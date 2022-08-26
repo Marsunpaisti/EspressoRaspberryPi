@@ -3,6 +3,15 @@ import socket
 import threading
 import struct
 import time
+import argparse
+
+parser = argparse.ArgumentParser(description="Sends dummy data over UDP to target ip and port", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("-i", "--ip", action="store", help="Receive ip address", default="127.0.0.1")
+parser.add_argument("-p", "--port", action="store", help="Receive port", default=7788)
+args = parser.parse_args()
+config = vars(args)
+IP = config["ip"]
+PORT = config["port"]
 
 def listenForData(sock):
     print("Listening for data...")
@@ -15,11 +24,8 @@ def listenForData(sock):
             print(f"Socket closed")
 
 def main():
-    UDP_IP = "127.0.0.1"
-    UDP_PORT = 7788
-
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    sock.bind((UDP_IP, UDP_PORT))
+    sock.bind((IP, PORT))
     threading.Thread(target=listenForData,args=(sock,)).start()
     while True:
         try: 
