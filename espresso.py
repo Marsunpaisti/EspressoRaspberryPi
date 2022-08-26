@@ -4,7 +4,6 @@ import board
 import digitalio
 import pwmio
 import adafruit_max31855
-import numpy as np
 import warnings
 import socket
 
