@@ -53,10 +53,5 @@ def main():
             print(f"Temperature: {boilerTemperature:.2f}")
             time.sleep(2.0)
 
-#if __name__ == "__main__":
-#    main()
-
-while True:
-    temp = max31855.temperature
-    print(f"Temp: {temp}")
-    time.sleep(1)
+if __name__ == "__main__":
+    main()
