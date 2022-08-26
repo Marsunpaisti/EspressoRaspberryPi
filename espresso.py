@@ -9,7 +9,7 @@ import socket
 import argparse
 
 parser = argparse.ArgumentParser(description="Sends dummy data over UDP to target ip and port", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-i", "--ip", action="store", help="Send data to ip address", required=False, Default = None)
+parser.add_argument("-i", "--ip", action="store", help="Send data to ip address", required=False, default=None)
 parser.add_argument("-p", "--port", action="store", help="Send data to port", default=7788)
 parser.add_argument("-r", "--interval", action="store", help="Sleep interval between reads", default=1),
 args = parser.parse_args()
@@ -52,7 +52,8 @@ def main():
             heaterDutyCycle = heaterPin.duty_cycle / 65535
             packedDataBytes = struct.pack("!fff", elapsedTime, boilerTemperature, heaterDutyCycle)
             print(f"Sending T: {elapsedTime} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle} to {(DATA_SEND_IP,DATA_SEND_PORT)}")
-            sock.sendto(packedDataBytes, (DATA_SEND_IP, DATA_SEND_PORT))
+            if (DATA_SEND_IP != None):
+                sock.sendto(packedDataBytes, (DATA_SEND_IP, DATA_SEND_PORT))
 
             print(f"Temperature: {boilerTemperature:.2f}")
             time.sleep(SLEEP_INTERVAL)
