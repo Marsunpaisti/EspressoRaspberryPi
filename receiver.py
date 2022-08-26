@@ -6,7 +6,7 @@ import time
 import argparse
 
 parser = argparse.ArgumentParser(description="Sends dummy data over UDP to target ip and port", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-i", "--ip", action="store", help="Receive ip address", default="127.0.0.1")
+parser.add_argument("-i", "--ip", action="store", help="Receive ip address", default="0.0.0.0")
 parser.add_argument("-p", "--port", action="store", help="Receive port", default=7788)
 args = parser.parse_args()
 config = vars(args)
@@ -19,7 +19,7 @@ def listenForData(sock):
         try:    
             data, addr = sock.recvfrom(1024)        
             timestamp, boilerTemperature, heaterDutyCycle = struct.unpack("!fff", data)
-            print(f"Received data: T: {timestamp} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle}")
+            print(f"Received T: {timestamp} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle}")
         except OSError as e:
             print(f"Socket closed")
 
