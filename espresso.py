@@ -47,6 +47,7 @@ def main():
             boilerTemperature = readTemperature()
             heaterDutycycle = heaterPin.duty_cycle / 65535
             packedDataBytes = struct.pack("!fff", elapsedTime, boilerTemperature, heaterDutycycle)
+            print(f"Sending {packedDataBytes}")
             sock.sendto(packedDataBytes, ("255.255.255.255", 7788))
 
             print(f"Temperature: {boilerTemperature:.2f}")
