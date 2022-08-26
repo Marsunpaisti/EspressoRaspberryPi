@@ -1,3 +1,4 @@
+import struct
 import time
 import board
 import digitalio
@@ -5,6 +6,7 @@ import pwmio
 import adafruit_max31855
 import numpy as np
 import warnings
+import socket
 
 spi = board.SPI()
 cs = digitalio.DigitalInOut(board.D8)
@@ -31,14 +33,24 @@ def readTemperature():
     """
     return max31855.temperature
 
+
+
 def main():
-    i = 0
-    while True:
-        i += 1
-        boilerTemperature = readTemperature()
-        print(f"Temperature: {boilerTemperature:.2f}")
-        setHeaterDutyCycle("asd")
-        time.sleep(3.0)
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        startedTime = time.time()
+        i = 0
+        while True:
+            i += 1
+
+            elapsedTime = time.time() - startedTime
+            boilerTemperature = readTemperature()
+            heaterDutycycle = heaterPin.duty_cycle / 65535
+            packedDataBytes = struct.pack("!fff", elapsedTime, boilerTemperature, heaterDutycycle)
+            sock.sendto(packedDataBytes, ("255.255.255.255", 7788))
+
+            print(f"Temperature: {boilerTemperature:.2f}")
+            time.sleep(2.0)
 
 if __name__ == "__main__":
     main()
