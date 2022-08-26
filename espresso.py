@@ -6,13 +6,22 @@ import pwmio
 import adafruit_max31855
 import warnings
 import socket
+import argparse
+
+parser = argparse.ArgumentParser(description="Sends dummy data over UDP to target ip and port", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("-i", "--ip", action="store", help="Send data to ip address", required=False, Default = None)
+parser.add_argument("-p", "--port", action="store", help="Send data to port", default=7788)
+parser.add_argument("-r", "--interval", action="store", help="Sleep interval between reads", default=1),
+args = parser.parse_args()
+config = vars(args)
+DATA_SEND_IP = config["ip"]
+DATA_SEND_PORT = config["port"]
+SLEEP_INTERVAL = float(config["interval"])
 
 spi = board.SPI()
 cs = digitalio.DigitalInOut(board.D8)
 max31855 = adafruit_max31855.MAX31855(spi, cs)
 heaterPin = pwmio.PWMOut(board.D4, frequency=1, duty_cycle=0, variable_frequency=False)
-#heaterPin = digitalio.DigitalInOut(board.D4)
-#heaterPin.switch_to_output(False)
 
 def setHeaterDutyCycle(dutyCycleFraction: float):
     """
@@ -32,25 +41,21 @@ def readTemperature():
     """
     return max31855.temperature
 
-
-
 def main():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         startedTime = time.time()
         i = 0
         while True:
             i += 1
-
             elapsedTime = time.time() - startedTime
             boilerTemperature = readTemperature()
-            heaterDutycycle = heaterPin.duty_cycle / 65535
-            packedDataBytes = struct.pack("!fff", elapsedTime, boilerTemperature, heaterDutycycle)
-            print(f"Sending {packedDataBytes}")
-            sock.sendto(packedDataBytes, ("255.255.255.255", 7788))
+            heaterDutyCycle = heaterPin.duty_cycle / 65535
+            packedDataBytes = struct.pack("!fff", elapsedTime, boilerTemperature, heaterDutyCycle)
+            print(f"Sending T: {elapsedTime} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle} to {(DATA_SEND_IP,DATA_SEND_PORT)}")
+            sock.sendto(packedDataBytes, (DATA_SEND_IP, DATA_SEND_PORT))
 
             print(f"Temperature: {boilerTemperature:.2f}")
-            time.sleep(2.0)
+            time.sleep(SLEEP_INTERVAL)
 
 if __name__ == "__main__":
     main()
