@@ -1,13 +1,19 @@
+from ast import arg
 import struct
 import time
 import socket
+import argparse
 
+parser = argparse.ArgumentParser(description="Sends dummy data over UDP to target ip and port", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("-i", "--ip", action="store", help="Target ip address", required=True)
+parser.add_argument("-p", "--port", action="store", help="Target port", default=7788)
+args = parser.parse_args()
+config = vars(args)
+IP = config["ip"]
+PORT = config["port"]
 
 def main():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind(("127.0.0.1", 7788))
         startedTime = time.time()
         i = 0
         while True:
@@ -16,8 +22,8 @@ def main():
             boilerTemperature = 123.4
             heaterDutycycle = 0.333
             packedDataBytes = struct.pack("!fff", elapsedTime, boilerTemperature, heaterDutycycle)
-            print(f"Sending {packedDataBytes}")
-            sock.sendto(packedDataBytes, ("255.255.255.255", 7788))
+            print(f"Sending {packedDataBytes} to {(IP,PORT)}")
+            sock.sendto(packedDataBytes, (IP, PORT))
 
             time.sleep(2.0)
 
