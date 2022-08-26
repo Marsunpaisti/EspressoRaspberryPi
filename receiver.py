@@ -13,7 +13,7 @@ config = vars(args)
 IP = config["ip"]
 PORT = config["port"]
 
-def listenForData(sock):
+def listenForData(sock: socket.socket):
     print("Listening for data...")
     while True:
         try:    
