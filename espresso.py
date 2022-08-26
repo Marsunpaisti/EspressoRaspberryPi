@@ -51,11 +51,11 @@ def main():
             boilerTemperature = readTemperature()
             heaterDutyCycle = heaterPin.duty_cycle / 65535
             packedDataBytes = struct.pack("!fff", elapsedTime, boilerTemperature, heaterDutyCycle)
-            print(f"Sending T: {elapsedTime} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle} to {(DATA_SEND_IP,DATA_SEND_PORT)}")
             if (DATA_SEND_IP != None):
+                print(f"Sending T: {elapsedTime} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle} to {(DATA_SEND_IP,DATA_SEND_PORT)}")
                 sock.sendto(packedDataBytes, (DATA_SEND_IP, DATA_SEND_PORT))
-
-            print(f"Temperature: {boilerTemperature:.2f}")
+            else:
+                print(f"T: {elapsedTime} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle}")
             time.sleep(SLEEP_INTERVAL)
 
 if __name__ == "__main__":
