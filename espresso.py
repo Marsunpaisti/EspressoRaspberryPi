@@ -44,11 +44,19 @@ def setHeaterDutyCycle(dutyCycleFraction: float):
         dutyCycleFraction = 0
     heaterPin.duty_cycle = round(dutyCycleFraction * 65535)
 
+latestValidTemp = 20
 def readTemperature():
     """
     Returns the MAX31855K temperature in celcius.
     """
-    return max31855.temperature
+    global latestValidTemp
+
+    try:
+        latestValidTemp = max31855.temperature
+        return latestValidTemp
+    except RuntimeError as e:
+        print(f"Error during readTemperature {e}. Returning latest valid temperature: {latestValidTemp}")
+        return latestValidTemp
 
 
 def listenForUdpCommands(sock: socket.socket):
