@@ -14,11 +14,13 @@ parser = argparse.ArgumentParser(description="Sends dummy data over UDP to targe
 parser.add_argument("-i", "--ip", action="store", help="Send data to ip address", required=False, default=None)
 parser.add_argument("-p", "--port", action="store", help="Send data to port", default=7788)
 parser.add_argument("-r", "--interval", action="store", help="Sleep interval between reads", default=1),
+parser.add_argument("-d", "--disableprints", action="store_true", help="Disable prints", default=False),
 args = parser.parse_args()
 config = vars(args)
 DATA_SEND_IP = config["ip"]
 DATA_SEND_PORT = config["port"]
 SLEEP_INTERVAL = float(config["interval"])
+DISABLE_PRINTS = config["disableprints"]
 
 spi = board.SPI()
 cs = digitalio.DigitalInOut(board.D8)
@@ -75,9 +77,11 @@ def main():
             heaterDutyCycle = heaterPin.duty_cycle / 65535
             steamingSwitch = steamSwitchPin.value
             packedDataBytes = struct.pack("fff", elapsedTime, boilerTemperature, heaterDutyCycle)
-            print(f"Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.2f}")
             if (DATA_SEND_IP != None):
                 sock.sendto(packedDataBytes, (DATA_SEND_IP, DATA_SEND_PORT))
+
+            if (not DISABLE_PRINTS):
+                print(f"Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.2f}")
 
             try: 
                 time.sleep(SLEEP_INTERVAL)
