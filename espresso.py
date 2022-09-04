@@ -71,12 +71,12 @@ def sendToUdp(temperature: float, steamingSwitchState: int, msgIndex: int):
     global latestCommandTimestamp
     global latestTimeoutTimestamp
     global sock
-    bytes = struct.pack("fbi", temperature, int(steamingSwitchState), int(msgIndex))
+    bytes = struct.pack("ifb",int(msgIndex), temperature, int(steamingSwitchState))
     if (sock != None and DATA_SEND_IP != None):
         sock.sendto(bytes, (DATA_SEND_IP, DATA_SEND_PORT))
     
         if (not DISABLE_PRINTS):
-            print(f"Sent data over UDP")
+            print(f"Sent data over UDP: {bytes}")
 
 def main():
     global latestCommandTimestamp
