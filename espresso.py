@@ -76,7 +76,7 @@ def sendToUdp(temperature: float, steamingSwitchState: int, msgIndex: int):
         sock.sendto(bytes, (DATA_SEND_IP, DATA_SEND_PORT))
     
         if (not DISABLE_PRINTS):
-            print(f"Sent data over UDP: {bytes}")
+            print(f"Sent data over UDP. Len: {len(bytes)}: {bytes}")
 
 def main():
     global latestCommandTimestamp
