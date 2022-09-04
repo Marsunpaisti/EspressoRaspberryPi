@@ -54,7 +54,7 @@ def listenForData(sock: socket.socket):
     while True:
         try:    
             data, addr = sock.recvfrom(1024)        
-            command = struct.unpack("f", data)
+            command, = struct.unpack("f", data)
             print(f"Cmd: {command}")
         except OSError as e:
             print(f"Socket closed")
