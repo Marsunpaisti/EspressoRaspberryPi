@@ -7,6 +7,8 @@ import adafruit_max31855
 import warnings
 import socket
 import argparse
+import threading
+import os
 
 parser = argparse.ArgumentParser(description="Sends dummy data over UDP to target ip and port", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--ip", action="store", help="Send data to ip address", required=False, default=None)
@@ -43,8 +45,27 @@ def readTemperature():
     """
     return max31855.temperature
 
+
+def listenForData(sock: socket.socket):
+    print("Listening for data...")
+    sock.bind(("0.0.0.0", DATA_SEND_PORT))
+    while True:
+        try:    
+            data, addr = sock.recvfrom(1024)        
+            command = struct.unpack("f", data)
+            print(f"Cmd: {command}")
+        except OSError as e:
+            print(f"Socket closed")
+
+#def startCommandListener():
+    #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    
 def main():
+    print(f"Starting EspressoPi")
+    print(f"UDP Data send address set to {(DATA_SEND_IP,DATA_SEND_PORT)}")
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
+        threading.Thread(target=listenForData,args=(sock,)).start()
+        
         startedTime = time.time()
         i = 0
         while True:
@@ -54,12 +75,16 @@ def main():
             heaterDutyCycle = heaterPin.duty_cycle / 65535
             steamingSwitch = steamSwitchPin.value
             packedDataBytes = struct.pack("fff", elapsedTime, boilerTemperature, heaterDutyCycle)
+            print(f"Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.2f}")
             if (DATA_SEND_IP != None):
-                print(f"Sending T: {elapsedTime} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle} Steaming: {steamingSwitch} to {(DATA_SEND_IP,DATA_SEND_PORT)}")
                 sock.sendto(packedDataBytes, (DATA_SEND_IP, DATA_SEND_PORT))
-            else:
-                print(f"T: {elapsedTime} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle} Steaming: {steamingSwitch}")
-            time.sleep(SLEEP_INTERVAL)
+
+            try: 
+                time.sleep(SLEEP_INTERVAL)
+            except KeyboardInterrupt:
+                print("Exiting")
+                sock.close()
+                os._exit(0)
 
 if __name__ == "__main__":
     main()
