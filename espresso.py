@@ -64,7 +64,7 @@ def main():
     print(f"Starting EspressoPi")
     print(f"UDP Data send address set to {(DATA_SEND_IP,DATA_SEND_PORT)}")
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
-        threading.Thread(target=listenForData,args=(sock,)).start()
+        #threading.Thread(target=listenForData,args=(sock,)).start()
         
         startedTime = time.time()
         i = 0
