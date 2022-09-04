@@ -26,8 +26,6 @@ def main():
             packedDataBytes = struct.pack("fff", elapsedTime, boilerTemperature, heaterDutycycle)
             print(f"Sending data at time: {elapsedTime} to {(IP,PORT)}")
             sock.sendto(packedDataBytes, (IP, PORT))
-            sock.sendto(packedDataBytes, (IP, PORT))
-            sock.sendto(packedDataBytes, (IP, PORT))
 
             time.sleep(SLEEP_INTERVAL)
 
