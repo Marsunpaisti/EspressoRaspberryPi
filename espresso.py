@@ -64,6 +64,7 @@ def listenForUdpCommands(sock: socket.socket):
 
 def sendToUdp(temperature: float, steamingSwitchState: int):
     bytes = struct.pack("fb", temperature, steamingSwitchState)
+    print(f"Sock: {sock} DataIp: {DATA_SEND_IP}")
     if (sock != None and DATA_SEND_IP != None):
         sock.sendto(bytes, (DATA_SEND_IP, DATA_SEND_PORT))
     
