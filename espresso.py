@@ -28,6 +28,8 @@ steamSwitchPin = digitalio.DigitalInOut(board.D23)
 steamSwitchPin.switch_to_input(pull=digitalio.Pull.UP)
 max31855 = adafruit_max31855.MAX31855(spi, cs)
 heaterPin = pwmio.PWMOut(board.D4, frequency=1, duty_cycle=0, variable_frequency=False)
+latestCommandTimestamp = time.time()
+latestTimeoutTimestamp = time.time()
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
 def setHeaterDutyCycle(dutyCycleFraction: float):
@@ -50,21 +52,26 @@ def readTemperature():
 
 
 def listenForUdpCommands(sock: socket.socket):
+    global latestCommandTimestamp
     print("Listening for UDP comamnds")
     sock.bind(("0.0.0.0", DATA_SEND_PORT))
     while True:
         try:    
             data, addr = sock.recvfrom(1024)        
-            command, = struct.unpack("f", data)
+            dutycycle, = struct.unpack("f", data)
+            latestCommandTimestamp = time.time()
+            setHeaterDutyCycle(dutycycle)
             if (not DISABLE_PRINTS):
-                print(f"Cmd: {command}")
+                print(f"CMD: {dutycycle}")
         except OSError as e:
             if (not DISABLE_PRINTS):
                 print(f"Socket closed")
 
 def sendToUdp(temperature: float, steamingSwitchState: int):
+    global latestCommandTimestamp
+    global latestTimeoutTimestamp
+    global sock
     bytes = struct.pack("fb", temperature, steamingSwitchState)
-    print(f"Sock: {sock} DataIp: {DATA_SEND_IP}")
     if (sock != None and DATA_SEND_IP != None):
         sock.sendto(bytes, (DATA_SEND_IP, DATA_SEND_PORT))
     
@@ -72,6 +79,9 @@ def sendToUdp(temperature: float, steamingSwitchState: int):
             print(f"Sent data over UDP")
 
 def main():
+    global latestCommandTimestamp
+    global latestTimeoutTimestamp
+    global sock
     print(f"Starting EspressoPi")
     if (DATA_SEND_IP):
         print(f"UDP Data send address set to {(DATA_SEND_IP,DATA_SEND_PORT)}")
@@ -85,6 +95,13 @@ def main():
         boilerTemperature = readTemperature()
         heaterDutyCycle = heaterPin.duty_cycle / 65535
         steamingSwitch = not steamSwitchPin.value
+
+        if (time.time() - latestCommandTimestamp > 3):
+            if (latestTimeoutTimestamp != latestCommandTimestamp):
+                print("Heater safety shutdown due to command timeout")
+                latestTimeoutTimestamp = latestCommandTimestamp
+            setHeaterDutyCycle(0)
+
         if (not DISABLE_PRINTS):
             print(f"T: {elapsedTime:.1f} Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.0f}")
         sendToUdp(boilerTemperature, steamingSwitch)
