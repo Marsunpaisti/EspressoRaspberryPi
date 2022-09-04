@@ -28,7 +28,7 @@ steamSwitchPin = digitalio.DigitalInOut(board.D23)
 steamSwitchPin.switch_to_input(pull=None)
 max31855 = adafruit_max31855.MAX31855(spi, cs)
 heaterPin = pwmio.PWMOut(board.D4, frequency=1, duty_cycle=0, variable_frequency=False)
-sock: socket.socket | None = None
+sock = None
 
 def setHeaterDutyCycle(dutyCycleFraction: float):
     """
