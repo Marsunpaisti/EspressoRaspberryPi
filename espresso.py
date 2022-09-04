@@ -64,7 +64,7 @@ def listenForUdpCommands(sock: socket.socket):
 
 def sendToUdp(temperature: float, steamingSwitchState: int):
     bytes = struct.pack("fb", temperature, steamingSwitchState)
-    if (sock != None):
+    if (sock != None and DATA_SEND_IP != None):
         sock.sendto(bytes, (DATA_SEND_IP, DATA_SEND_PORT))
     
         if (not DISABLE_PRINTS):
@@ -86,7 +86,7 @@ def main():
             elapsedTime = time.time() - startedTime
             boilerTemperature = readTemperature()
             heaterDutyCycle = heaterPin.duty_cycle / 65535
-            steamingSwitch = steamSwitchPin.value
+            steamingSwitch = not steamSwitchPin.value
             if (not DISABLE_PRINTS):
                 print(f"T: {elapsedTime:.1f} Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.0f}")
             sendToUdp(boilerTemperature, steamingSwitch)
