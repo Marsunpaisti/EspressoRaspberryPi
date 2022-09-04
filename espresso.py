@@ -71,7 +71,7 @@ def sendToUdp(temperature: float, steamingSwitchState: int, msgIndex: int):
     global latestCommandTimestamp
     global latestTimeoutTimestamp
     global sock
-    bytes = struct.pack("fbI", temperature, steamingSwitchState, msgIndex)
+    bytes = struct.pack("fbI", temperature, int(steamingSwitchState), int(msgIndex))
     if (sock != None and DATA_SEND_IP != None):
         sock.sendto(bytes, (DATA_SEND_IP, DATA_SEND_PORT))
     
