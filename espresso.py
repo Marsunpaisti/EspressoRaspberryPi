@@ -28,6 +28,7 @@ steamSwitchPin = digitalio.DigitalInOut(board.D23)
 steamSwitchPin.switch_to_input(pull=None)
 max31855 = adafruit_max31855.MAX31855(spi, cs)
 heaterPin = pwmio.PWMOut(board.D4, frequency=1, duty_cycle=0, variable_frequency=False)
+sock: socket.socket | None = None
 
 def setHeaterDutyCycle(dutyCycleFraction: float):
     """
@@ -48,25 +49,35 @@ def readTemperature():
     return max31855.temperature
 
 
-def listenForData(sock: socket.socket):
-    print("Listening for data...")
+def listenForUdpCommands(sock: socket.socket):
+    print("Listening for UDP comamnds")
     sock.bind(("0.0.0.0", DATA_SEND_PORT))
     while True:
         try:    
             data, addr = sock.recvfrom(1024)        
             command, = struct.unpack("f", data)
-            print(f"Cmd: {command}")
+            if (not DISABLE_PRINTS):
+                print(f"Cmd: {command}")
         except OSError as e:
-            print(f"Socket closed")
+            if (not DISABLE_PRINTS):
+                print(f"Socket closed")
 
-#def startCommandListener():
-    #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+def sendToUdp(temperature: float, steamingSwitchState: int):
+    bytes = struct.pack("fc", temperature, steamingSwitchState)
+    if (sock != None):
+        sock.sendto(bytes, (DATA_SEND_IP, DATA_SEND_PORT))
     
+        if (not DISABLE_PRINTS):
+            print(f"Sent data over UDP")
+
 def main():
     print(f"Starting EspressoPi")
-    print(f"UDP Data send address set to {(DATA_SEND_IP,DATA_SEND_PORT)}")
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
-        threading.Thread(target=listenForData,args=(sock,)).start()
+    if (DATA_SEND_IP):
+        print(f"UDP Data send address set to {(DATA_SEND_IP,DATA_SEND_PORT)}")
+
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as udpsock:
+        sock = udpsock
+        threading.Thread(target=listenForUdpCommands,args=(sock,)).start()
         
         startedTime = time.time()
         i = 0
@@ -76,12 +87,9 @@ def main():
             boilerTemperature = readTemperature()
             heaterDutyCycle = heaterPin.duty_cycle / 65535
             steamingSwitch = steamSwitchPin.value
-            packedDataBytes = struct.pack("fff", elapsedTime, boilerTemperature, heaterDutyCycle)
-            if (DATA_SEND_IP != None):
-                sock.sendto(packedDataBytes, (DATA_SEND_IP, DATA_SEND_PORT))
-
             if (not DISABLE_PRINTS):
-                print(f"Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.2f}")
+                print(f"T: {elapsedTime:.1f} Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.0f}")
+            sendToUdp(boilerTemperature, steamingSwitch)
 
             try: 
                 time.sleep(SLEEP_INTERVAL)
