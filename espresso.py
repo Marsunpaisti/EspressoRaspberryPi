@@ -20,6 +20,8 @@ SLEEP_INTERVAL = float(config["interval"])
 
 spi = board.SPI()
 cs = digitalio.DigitalInOut(board.D8)
+steamSwitchPin = digitalio.DigitalInOut(board.D23)
+steamSwitchPin.switch_to_input(pull=None)
 max31855 = adafruit_max31855.MAX31855(spi, cs)
 heaterPin = pwmio.PWMOut(board.D4, frequency=1, duty_cycle=0, variable_frequency=False)
 
@@ -50,12 +52,13 @@ def main():
             elapsedTime = time.time() - startedTime
             boilerTemperature = readTemperature()
             heaterDutyCycle = heaterPin.duty_cycle / 65535
-            packedDataBytes = struct.pack("!fff", elapsedTime, boilerTemperature, heaterDutyCycle)
+            steamingSwitch = steamSwitchPin.value
+            packedDataBytes = struct.pack("fff", elapsedTime, boilerTemperature, heaterDutyCycle)
             if (DATA_SEND_IP != None):
-                print(f"Sending T: {elapsedTime} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle} to {(DATA_SEND_IP,DATA_SEND_PORT)}")
+                print(f"Sending T: {elapsedTime} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle} Steaming: {steamingSwitch} to {(DATA_SEND_IP,DATA_SEND_PORT)}")
                 sock.sendto(packedDataBytes, (DATA_SEND_IP, DATA_SEND_PORT))
             else:
-                print(f"T: {elapsedTime} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle}")
+                print(f"T: {elapsedTime} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle} Steaming: {steamingSwitch}")
             time.sleep(SLEEP_INTERVAL)
 
 if __name__ == "__main__":

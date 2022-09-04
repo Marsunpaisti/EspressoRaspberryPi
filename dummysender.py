@@ -23,7 +23,7 @@ def main():
             elapsedTime = time.time() - startedTime
             boilerTemperature = 123.4
             heaterDutycycle = 0.333
-            packedDataBytes = struct.pack("!fff", elapsedTime, boilerTemperature, heaterDutycycle)
+            packedDataBytes = struct.pack("fff", elapsedTime, boilerTemperature, heaterDutycycle)
             print(f"Sending data at time: {elapsedTime} to {(IP,PORT)}")
             sock.sendto(packedDataBytes, (IP, PORT))
 

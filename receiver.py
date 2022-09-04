@@ -18,7 +18,7 @@ def listenForData(sock: socket.socket):
     while True:
         try:    
             data, addr = sock.recvfrom(1024)        
-            timestamp, boilerTemperature, heaterDutyCycle = struct.unpack("!fff", data)
+            timestamp, boilerTemperature, heaterDutyCycle = struct.unpack("fff", data)
             print(f"Received T: {timestamp} Temp: {boilerTemperature} HeaterDutyCycle: {heaterDutyCycle}")
         except OSError as e:
             print(f"Socket closed")
