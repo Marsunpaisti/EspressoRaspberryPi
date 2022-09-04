@@ -63,7 +63,7 @@ def listenForUdpCommands(sock: socket.socket):
                 print(f"Socket closed")
 
 def sendToUdp(temperature: float, steamingSwitchState: int):
-    bytes = struct.pack("fc", temperature, steamingSwitchState)
+    bytes = struct.pack("fb", temperature, steamingSwitchState)
     if (sock != None):
         sock.sendto(bytes, (DATA_SEND_IP, DATA_SEND_PORT))
     
