@@ -67,11 +67,11 @@ def listenForUdpCommands(sock: socket.socket):
             if (not DISABLE_PRINTS):
                 print(f"Socket closed")
 
-def sendToUdp(temperature: float, steamingSwitchState: int):
+def sendToUdp(temperature: float, steamingSwitchState: int, msgIndex: int):
     global latestCommandTimestamp
     global latestTimeoutTimestamp
     global sock
-    bytes = struct.pack("fb", temperature, steamingSwitchState)
+    bytes = struct.pack("fbI", temperature, steamingSwitchState, msgIndex)
     if (sock != None and DATA_SEND_IP != None):
         sock.sendto(bytes, (DATA_SEND_IP, DATA_SEND_PORT))
     
@@ -104,7 +104,7 @@ def main():
 
         if (not DISABLE_PRINTS):
             print(f"T: {elapsedTime:.1f} Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.0f}")
-        sendToUdp(boilerTemperature, steamingSwitch)
+        sendToUdp(boilerTemperature, steamingSwitch, i)
 
         try: 
             time.sleep(SLEEP_INTERVAL)
