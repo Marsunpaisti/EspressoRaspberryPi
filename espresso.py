@@ -44,18 +44,24 @@ def setHeaterDutyCycle(dutyCycleFraction: float):
         dutyCycleFraction = 0
     heaterPin.duty_cycle = round(dutyCycleFraction * 65535)
 
+consecutiveReadTempFails = 0
 latestValidTemp = 20
 def readTemperature():
     """
     Returns the MAX31855K temperature in celcius.
     """
     global latestValidTemp
+    global consecutiveReadTempFails
 
     try:
         latestValidTemp = max31855.temperature
+        consecutiveReadTempFails = 0
         return latestValidTemp
     except RuntimeError as e:
+        consecutiveReadTempFails = consecutiveReadTempFails + 1
         print(f"Error during readTemperature {e}. Returning latest valid temperature: {latestValidTemp}")
+        if (consecutiveReadTempFails > 3):
+            raise RuntimeError("Too many consecutive temperature read failures.", e)
         return latestValidTemp
 
 
