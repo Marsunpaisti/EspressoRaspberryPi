@@ -28,7 +28,7 @@ steamSwitchPin = digitalio.DigitalInOut(board.D23)
 steamSwitchPin.switch_to_input(pull=digitalio.Pull.UP)
 max31855 = adafruit_max31855.MAX31855(spi, cs)
 heaterPin = pwmio.PWMOut(board.D4, frequency=1, duty_cycle=0, variable_frequency=False)
-sock = None
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
 def setHeaterDutyCycle(dutyCycleFraction: float):
     """
@@ -75,29 +75,26 @@ def main():
     print(f"Starting EspressoPi")
     if (DATA_SEND_IP):
         print(f"UDP Data send address set to {(DATA_SEND_IP,DATA_SEND_PORT)}")
+    threading.Thread(target=listenForUdpCommands,args=(sock,)).start()
+    
+    startedTime = time.time()
+    i = 0
+    while True:
+        i += 1
+        elapsedTime = time.time() - startedTime
+        boilerTemperature = readTemperature()
+        heaterDutyCycle = heaterPin.duty_cycle / 65535
+        steamingSwitch = not steamSwitchPin.value
+        if (not DISABLE_PRINTS):
+            print(f"T: {elapsedTime:.1f} Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.0f}")
+        sendToUdp(boilerTemperature, steamingSwitch)
 
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as udpsock:
-        sock = udpsock
-        threading.Thread(target=listenForUdpCommands,args=(sock,)).start()
-        
-        startedTime = time.time()
-        i = 0
-        while True:
-            i += 1
-            elapsedTime = time.time() - startedTime
-            boilerTemperature = readTemperature()
-            heaterDutyCycle = heaterPin.duty_cycle / 65535
-            steamingSwitch = not steamSwitchPin.value
-            if (not DISABLE_PRINTS):
-                print(f"T: {elapsedTime:.1f} Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.0f}")
-            sendToUdp(boilerTemperature, steamingSwitch)
-
-            try: 
-                time.sleep(SLEEP_INTERVAL)
-            except KeyboardInterrupt:
-                print("Exiting")
-                sock.close()
-                os._exit(0)
+        try: 
+            time.sleep(SLEEP_INTERVAL)
+        except KeyboardInterrupt:
+            print("Exiting")
+            sock.close()
+            os._exit(0)
 
 if __name__ == "__main__":
     main()
