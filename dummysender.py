@@ -15,6 +15,7 @@ PORT = config["port"]
 SLEEP_INTERVAL = float(config["interval"])
 
 def main():
+    print(f"Starting dummy data sender. Address: {(IP,PORT)} Interval: {SLEEP_INTERVAL}")
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
         startedTime = time.time()
         i = 0
