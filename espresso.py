@@ -60,7 +60,8 @@ def readTemperature():
     except RuntimeError as e:
         consecutiveReadTempFails = consecutiveReadTempFails + 1
         print(f"Error during readTemperature {e}. Returning latest valid temperature: {latestValidTemp}")
-        if (consecutiveReadTempFails > 3):
+        if (consecutiveReadTempFails > 10):
+            setHeaterDutyCycle(0)
             raise RuntimeError("Too many consecutive temperature read failures.", e)
         return latestValidTemp
 
