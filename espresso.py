@@ -13,7 +13,7 @@ import os
 parser = argparse.ArgumentParser(description="Sends dummy data over UDP to target ip and port", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--ip", action="store", help="Send data to ip address", required=False, default=None)
 parser.add_argument("-p", "--port", action="store", help="Send data to port", default=7788)
-parser.add_argument("-r", "--interval", action="store", help="Sleep interval between reads", default=1),
+parser.add_argument("-r", "--interval", action="store", help="Sleep interval between reads", default=0.5),
 parser.add_argument("-d", "--disableprints", action="store_true", help="Disable prints", default=False),
 args = parser.parse_args()
 config = vars(args)
@@ -27,7 +27,7 @@ cs = digitalio.DigitalInOut(board.D8)
 steamSwitchPin = digitalio.DigitalInOut(board.D23)
 steamSwitchPin.switch_to_input(pull=digitalio.Pull.UP)
 max31855 = adafruit_max31855.MAX31855(spi, cs)
-heaterPin = pwmio.PWMOut(board.D4, frequency=1, duty_cycle=0, variable_frequency=False)
+heaterPin = pwmio.PWMOut(board.D4, frequency=2, duty_cycle=0, variable_frequency=False)
 latestCommandTimestamp = time.time()
 latestTimeoutTimestamp = time.time()
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
