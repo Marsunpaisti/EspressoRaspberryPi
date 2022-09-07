@@ -1,5 +1,6 @@
 import struct
 import time
+from xmlrpc.client import boolean
 import board
 import digitalio
 import pwmio
@@ -53,6 +54,9 @@ def setHeaterDutyCycle(dutyCycleFraction: float):
         warnings.warn(f"setHeaterDutyCycle dutyCycleFraction should be between 0 and 1, value was {dutyCycleFraction}. Clamped to 0.")
         dutyCycleFraction = 0
     heaterPin.duty_cycle = round(dutyCycleFraction * 65535)
+
+def togglePump(enabled: boolean):
+    pumpPin.value = enabled
 
 consecutiveReadTempFails = 0
 latestValidTemp = 20
@@ -112,10 +116,7 @@ def controlLoop():
 
     # Always feeding brew switch state to pump
     brewSwitch = not brewSwitchPin.value
-    if (brewSwitch):
-        pumpPin.value = True
-    else:
-        pumpPin.value = False
+    togglePump(brewSwitch)
 
     if (time.time() - lastControlTimestamp < SLEEP_INTERVAL):
         return
