@@ -24,13 +24,23 @@ DISABLE_PRINTS = config["disableprints"]
 
 spi = board.SPI()
 cs = digitalio.DigitalInOut(board.D8)
+max31855 = adafruit_max31855.MAX31855(spi, cs)
+
 steamSwitchPin = digitalio.DigitalInOut(board.D23)
 steamSwitchPin.switch_to_input(pull=digitalio.Pull.UP)
-max31855 = adafruit_max31855.MAX31855(spi, cs)
+brewSwitchPin = digitalio.DigitalInOut(board.D12)
+brewSwitchPin.switch_to_input(pull=digitalio.Pull.UP)
+pumpPin = digitalio.DigitalInOut(board.D26)
+pumpPin.switch_to_output(False)
 heaterPin = pwmio.PWMOut(board.D4, frequency=2, duty_cycle=0, variable_frequency=False)
+
+
 latestCommandTimestamp = time.time()
 latestTimeoutTimestamp = time.time()
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+lastControlTimestamp = 0
+startedTime = time.time()
+i = 0
 
 def setHeaterDutyCycle(dutyCycleFraction: float):
     """
@@ -82,47 +92,62 @@ def listenForUdpCommands(sock: socket.socket):
             if (not DISABLE_PRINTS):
                 print(f"Socket closed")
 
-def sendToUdp(temperature: float, steamingSwitchState: int, msgIndex: int):
+def sendToUdp(temperature: float, steamingSwitchState: int, brewSwitchState: int, msgIndex: int):
     global latestCommandTimestamp
     global latestTimeoutTimestamp
     global sock
-    bytes = struct.pack("<ifb",int(msgIndex), temperature, int(steamingSwitchState))
+    bytes = struct.pack("<ifbb",int(msgIndex), temperature, int(steamingSwitchState), int(brewSwitchState))
     if (sock != None and DATA_SEND_IP != None):
         sock.sendto(bytes, (DATA_SEND_IP, DATA_SEND_PORT))
     
         if (not DISABLE_PRINTS):
             print(f"Sent data over UDP. Len: {len(bytes)}: {bytes}")
 
-def main():
+def controlLoop():
     global latestCommandTimestamp
     global latestTimeoutTimestamp
+    global lastControlTimestamp
+    global sock
+    global i
+
+    # Always feeding brew switch state to pump
+    brewSwitch = not brewSwitchPin.value
+    if (brewSwitch):
+        pumpPin.value = True
+    else:
+        pumpPin.value = False
+
+    if (time.time() - lastControlTimestamp < SLEEP_INTERVAL):
+        return
+    i += 1
+    elapsedTime = time.time() - startedTime
+    boilerTemperature = readTemperature()
+    heaterDutyCycle = heaterPin.duty_cycle / 65535
+    steamingSwitch = not steamSwitchPin.value
+
+    if (time.time() - latestCommandTimestamp > 3):
+        if (latestTimeoutTimestamp != latestCommandTimestamp):
+            print("Heater safety shutdown due to command timeout")
+            latestTimeoutTimestamp = latestCommandTimestamp
+        setHeaterDutyCycle(0)
+
+    if (not DISABLE_PRINTS):
+        print(f"T: {elapsedTime:.1f} Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.0f}")
+    sendToUdp(boilerTemperature, steamingSwitch, brewSwitch, i)
+    lastControlTimestamp = time.time()
+
+def main():
     global sock
     print(f"Starting EspressoPi")
     if (DATA_SEND_IP):
         print(f"UDP Data send address set to {(DATA_SEND_IP,DATA_SEND_PORT)}")
     threading.Thread(target=listenForUdpCommands,args=(sock,)).start()
     
-    startedTime = time.time()
-    i = 0
     while True:
-        i += 1
-        elapsedTime = time.time() - startedTime
-        boilerTemperature = readTemperature()
-        heaterDutyCycle = heaterPin.duty_cycle / 65535
-        steamingSwitch = not steamSwitchPin.value
-
-        if (time.time() - latestCommandTimestamp > 3):
-            if (latestTimeoutTimestamp != latestCommandTimestamp):
-                print("Heater safety shutdown due to command timeout")
-                latestTimeoutTimestamp = latestCommandTimestamp
-            setHeaterDutyCycle(0)
-
-        if (not DISABLE_PRINTS):
-            print(f"T: {elapsedTime:.1f} Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.0f}")
-        sendToUdp(boilerTemperature, steamingSwitch, i)
+        controlLoop()
 
         try: 
-            time.sleep(SLEEP_INTERVAL)
+            time.sleep(0.01)
         except KeyboardInterrupt:
             print("Exiting")
             sock.close()
