@@ -169,7 +169,11 @@ def main():
         print(f"UDP Data send address set to {(DATA_SEND_IP,DATA_SEND_PORT)}")
 
     while True:
-        controlLoop()
+        try:
+            controlLoop()
+        except Exception as e:
+            setHeaterDutyCycle(0)
+            raise Exception
 
         try:
             time.sleep(0.01)
