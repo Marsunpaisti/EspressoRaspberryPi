@@ -157,7 +157,7 @@ def controlLoop():
 
     # PID Control
     pidOutput = pidController.step(
-        float(setpoint - boilerTemperature), float(timeSinceLastSample))
+        float(setpoint - boilerTemperature), SAMPLING_INTERVAL)
 
     # Brew switch feedforward compensator
     compensatorOutput = 0.0
