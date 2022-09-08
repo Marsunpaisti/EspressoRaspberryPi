@@ -180,6 +180,7 @@ def controlLoop():
         setHeaterDutyCycle(0)
 
     # Send measurements over UDP
+    setHeaterDutyCycle(0)
     sendToUdp(boilerTemperature, steamingSwitch, brewSwitch, i, output)
 
     return
