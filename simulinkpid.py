@@ -70,11 +70,11 @@ class DiscretePid():
     def step(self, error: float, sampleTime: float) -> float:
         self.error.value = error
         self.sampleTime.value = sampleTime
-        #print(f"Calling PID with err: {self.error}, p: {self.pGain}, i: {self.iGain}, d: {self.dGain}, N: {self.filterCoeff}, iState: {self.integratorState}, fState: {self.filterState}, upperLimit: {self.upperLimit} , lowerLimit: {self.lowerLimit}, Ts: {self.sampleTime}")
+        print(f"Calling PID with err: {self.error}, p: {self.pGain}, i: {self.iGain}, d: {self.dGain}, N: {self.filterCoeff}, iState: {self.integratorState}, fState: {self.filterState}, upperLimit: {self.upperLimit} , lowerLimit: {self.lowerLimit}, Ts: {self.sampleTime}")
         cPID_Step(self.ptr_RT_MODEL_PIDController_T, self.error, self.pGain, self.iGain, self.dGain, self.filterCoeff,
                   self.integratorState, self.filterState, self.upperLimit, self.lowerLimit, self.sampleTime, byref(self.output))
-        #print(f"Out: {self.output}")
-        print(f"PIDC_T: {self.DW_PIDController_T}")
-        print(f"RTM_PIDC_T.DWORK: {self.RT_MODEL_PIDController_T.dwork}")
-        print(f"RTM_PIDC_T: {self.RT_MODEL_PIDController_T}")
+        print(f"Out: {self.output}")
+        #print(f"PIDC_T: {self.DW_PIDController_T}")
+        #print(f"RTM_PIDC_T.DWORK: {self.RT_MODEL_PIDController_T.dwork}")
+        #print(f"RTM_PIDC_T: {self.RT_MODEL_PIDController_T}")
         return self.output.value
