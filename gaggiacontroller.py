@@ -35,7 +35,7 @@ heaterPin = pwmio.PWMOut(board.D4, frequency=2,
 
 
 class GaggiaController():
-    def __init__(self, telemetryAddress, sio: socketio.Server):
+    def __init__(self, telemetryAddress, sio):
         if (telemetryAddress != None):
             self.telemetryAddress = telemetryAddress
             self.sock = socket.socket(
