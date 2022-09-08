@@ -42,7 +42,7 @@ class DiscretePid():
         self.upperLimit = c_double()
         self.lowerLimit = c_double()
         self.sampleTime = c_double()
-        self.output = c_double()
+        self.output = c_double(0)
         self.ptr_output = pointer(self.output)
 
         cPID_Initialize(self.ptr_RT_MODEL_PIDController_T, byref(self.error), byref(self.pGain), byref(self.iGain), byref(self.dGain), byref(self.filterCoeff), byref(

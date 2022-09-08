@@ -53,14 +53,14 @@ def setHeaterDutyCycle(dutyCycleFraction: float):
     """
     Sets heater pin PWM duty cycle from dutyCycleFraction between (0-1), mapping it to (0 - 65535) accordingly
     """
-    if (dutyCycleFraction > 1):
+    if (dutyCycleFraction > 1.0):
         warnings.warn(
             f"setHeaterDutyCycle dutyCycleFraction should be between 0 and 1, value was {dutyCycleFraction}. Clamped to 1.")
-        dutyCycleFraction = 1
-    if (dutyCycleFraction < 0):
+        dutyCycleFraction = 1.0
+    if (dutyCycleFraction < 0.0):
         warnings.warn(
             f"setHeaterDutyCycle dutyCycleFraction should be between 0 and 1, value was {dutyCycleFraction}. Clamped to 0.")
-        dutyCycleFraction = 0
+        dutyCycleFraction = 0.0
     heaterPin.duty_cycle = round(dutyCycleFraction * 65535)
 
 
