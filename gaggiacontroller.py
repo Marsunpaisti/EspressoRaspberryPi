@@ -96,7 +96,7 @@ class GaggiaController():
                 self.__setPumpEnabled(False)
                 heaterPin.deinit()
 
-    async def __controlLoopLogic(self):
+    def __controlLoopLogic(self):
         timeSinceLastSample = time.time() - self.lastSampleTimestamp
         if (timeSinceLastSample < SAMPLING_INTERVAL):
             return
