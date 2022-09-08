@@ -73,7 +73,7 @@ class DiscretePid():
         cPID_Step(self.ptr_RT_MODEL_PIDController_T, self.error, self.pGain, self.iGain, self.dGain, self.filterCoeff,
                   self.integratorState, self.filterState, self.upperLimit, self.lowerLimit, self.sampleTime, self.ptr_output)
 
-        self.filterState = self.RT_MODEL_PIDController_T.dwork.contents.Filter_DSTATE
-        self.integratorState = self.RT_MODEL_PIDController_T.dwork.contents.Integrator_DSTATE
+        self.filterState.value = self.RT_MODEL_PIDController_T.dwork.contents.Filter_DSTATE
+        self.integratorState.value = self.RT_MODEL_PIDController_T.dwork.contents.Integrator_DSTATE
         print(f"Out: {self.output}")
         return self.output.value
