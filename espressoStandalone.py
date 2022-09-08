@@ -42,11 +42,12 @@ heaterPin = pwmio.PWMOut(board.D4, frequency=2,
 latestCommandTimestamp = time.time()
 latestTimeoutTimestamp = time.time()
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-lastControlTimestamp = 0
+lastControlTimestamp = 0.0
 startedTime = time.time()
 pidController = simulinkpid.DiscretePid(0.046, 0.0018, -0.0030, 3.168544, 1, 0)
 i = 0
-setpoint = 93
+steam_setpoint = 150.0
+brew_setpoint = 94.0
 
 
 def setHeaterDutyCycle(dutyCycleFraction: float):
@@ -131,8 +132,16 @@ def controlLoop():
         print(f"T: {elapsedTime:.1f} Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.0f}")
     sendToUdp(boilerTemperature, steamingSwitch, brewSwitch, i)
 
+    # Setpoint control
+    setpoint = brew_setpoint
+    if (steamingSwitch):
+        setpoint = steam_setpoint
+    else:
+        setpoint = brew_setpoint
+
     # PID Control
-    pidOutput = pidController.step(setpoint - boilerTemperature, elapsedTime)
+    pidOutput = pidController.step(
+        float(setpoint - boilerTemperature), float(elapsedTime))
 
     # Brew switch feedforward compensator
     compensatorOutput = 0.0
