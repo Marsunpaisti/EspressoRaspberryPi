@@ -1,6 +1,4 @@
 from ctypes import *
-from tkinter.messagebox import NO
-from tokenize import Double
 import os.path
 
 dll_name = "DiscredePid.so"
