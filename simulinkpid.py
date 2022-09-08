@@ -16,12 +16,12 @@ cPID_Step = libc.PIDController_step
 class DW_PIDController_T(Structure):
     _fields_ = [("Integrator_DSTATE", c_double),
                 ("Filter_DSTATE", c_double),
-                ("Integrator_IC_LOADING", c_uint8),
-                ("Filter_IC_LOADING", c_uint8)]
+                ("Integrator_IC_LOADING", c_ubyte),
+                ("Filter_IC_LOADING", c_ubyte)]
 
 
 class RT_MODEL_PIDController_T(Structure):
-    _fields_ = [("errorStatus", c_char),
+    _fields_ = [("errorStatus", POINTER(c_char)),
                 ("dwork", POINTER(DW_PIDController_T))]
 
 
@@ -70,7 +70,7 @@ class DiscretePid():
     def step(self, error: float, sampleTime: float) -> float:
         self.error.value = error
         self.sampleTime.value = sampleTime
-        print(f"Calling PID with err: {self.error}, p: {self.pGain}, i: {self.iGain}, d: {self.dGain}, d: {self.filterCoeff}, iState: {self.integratorState}, fState: {self.filterState}, upperLimit: {self.upperLimit} , lowerLimit: {self.lowerLimit}, Ts: {self.sampleTime}")
+        print(f"Calling PID with err: {self.error}, p: {self.pGain}, i: {self.iGain}, d: {self.dGain}, N: {self.filterCoeff}, iState: {self.integratorState}, fState: {self.filterState}, upperLimit: {self.upperLimit} , lowerLimit: {self.lowerLimit}, Ts: {self.sampleTime}")
         cPID_Step(self.ptr_RT_MODEL_PIDController_T, self.error, self.pGain, self.iGain, self.dGain, self.filterCoeff,
                   self.integratorState, self.filterState, self.upperLimit, self.lowerLimit, self.sampleTime, byref(self.output))
         print(f"Out: {self.output}")

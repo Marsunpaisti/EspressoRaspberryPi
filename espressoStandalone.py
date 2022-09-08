@@ -158,15 +158,11 @@ def controlLoop():
         output = 0
 
     setHeaterDutyCycle(output)
-
     lastControlTimestamp = time.time()
 
     # Safety limit
-    if (boilerTemperature > 170):
+    if (boilerTemperature > 165):
         setHeaterDutyCycle(0)
-
-    # Debug jesus fuck
-    setHeaterDutyCycle(0)
     return
 
 
