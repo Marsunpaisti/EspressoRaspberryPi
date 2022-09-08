@@ -1,4 +1,5 @@
 import struct
+import threading
 import time
 import board
 import digitalio
@@ -63,6 +64,23 @@ def setHeaterDutyCycle(dutyCycleFraction: float):
             f"setHeaterDutyCycle dutyCycleFraction should be between 0 and 1, value was {dutyCycleFraction}. Clamped to 0.")
         dutyCycleFraction = 0.0
     heaterPin.duty_cycle = round(dutyCycleFraction * 65535)
+
+
+def listenForUdpCommands(sock: socket.socket):
+    global latestCommandTimestamp
+    print("Listening for UDP comamnds")
+    sock.bind(("0.0.0.0", DATA_SEND_PORT))
+    while True:
+        try:
+            data, addr = sock.recvfrom(1024)
+            dutycycle, = struct.unpack("f", data)
+            latestCommandTimestamp = time.time()
+            setHeaterDutyCycle(dutycycle)
+            if (not DISABLE_PRINTS):
+                print(f"CMD: {dutycycle}")
+        except OSError as e:
+            if (not DISABLE_PRINTS):
+                print(f"Socket closed")
 
 
 def togglePump(enabled: bool):
@@ -154,7 +172,7 @@ def controlLoop():
     if (output < 0):
         output = 0
 
-    setHeaterDutyCycle(output)
+    # setHeaterDutyCycle(output)
     lastControlTimestamp = time.time()
 
     # Safety limit
@@ -172,6 +190,7 @@ def main():
     print(f"Starting EspressoPi")
     if (DATA_SEND_IP):
         print(f"UDP Data send address set to {(DATA_SEND_IP,DATA_SEND_PORT)}")
+    threading.Thread(target=listenForUdpCommands, args=(sock,)).start()
 
     while True:
         try:
