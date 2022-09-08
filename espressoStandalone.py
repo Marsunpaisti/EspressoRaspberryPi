@@ -37,7 +37,7 @@ brewSwitchPin.switch_to_input(pull=digitalio.Pull.UP)
 pumpPin = digitalio.DigitalInOut(board.D26)
 pumpPin.switch_to_output(False)
 heaterPin = pwmio.PWMOut(board.D4, frequency=2,
-                         duty_cycle=0, variable_frequency=True)
+                         duty_cycle=0, variable_frequency=False)
 
 
 latestCommandTimestamp = time.time()
