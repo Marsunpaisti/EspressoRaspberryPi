@@ -16,12 +16,12 @@ cPID_Step = libc.PIDController_step
 class DW_PIDController_T(Structure):
     _fields_ = [("Integrator_DSTATE", c_double),
                 ("Filter_DSTATE", c_double),
-                ("Integrator_IC_LOADING", c_ubyte),
-                ("Filter_IC_LOADING", c_ubyte)]
+                ("Integrator_IC_LOADING", c_uint8),
+                ("Filter_IC_LOADING", c_uint8)]
 
 
 class RT_MODEL_PIDController_T(Structure):
-    _fields_ = [("errorStatus", POINTER(c_char)),
+    _fields_ = [("errorStatus", c_char_p),
                 ("dwork", POINTER(DW_PIDController_T))]
 
 
@@ -42,11 +42,11 @@ class DiscretePid():
         self.upperLimit = c_double()
         self.lowerLimit = c_double()
         self.sampleTime = c_double()
-        self.output = c_double(0)
+        self.output = c_double()
         self.ptr_output = pointer(self.output)
 
         cPID_Initialize(self.ptr_RT_MODEL_PIDController_T, byref(self.error), byref(self.pGain), byref(self.iGain), byref(self.dGain), byref(self.filterCoeff), byref(
-            self.integratorState), byref(self.filterState), byref(self.upperLimit), byref(self.lowerLimit), byref(self.sampleTime), byref(self.output))
+            self.integratorState), byref(self.filterState), byref(self.upperLimit), byref(self.lowerLimit), byref(self.sampleTime), self.ptr_output)
 
         self.setGains(pGain, iGain, dGain, filterCoeff, upperLimit, lowerLimit)
 
@@ -72,9 +72,10 @@ class DiscretePid():
         self.sampleTime.value = sampleTime
         print(f"Calling PID with err: {self.error}, p: {self.pGain}, i: {self.iGain}, d: {self.dGain}, N: {self.filterCoeff}, iState: {self.integratorState}, fState: {self.filterState}, upperLimit: {self.upperLimit} , lowerLimit: {self.lowerLimit}, Ts: {self.sampleTime}")
         cPID_Step(self.ptr_RT_MODEL_PIDController_T, self.error, self.pGain, self.iGain, self.dGain, self.filterCoeff,
-                  self.integratorState, self.filterState, self.upperLimit, self.lowerLimit, self.sampleTime, byref(self.output))
+                  self.integratorState, self.filterState, self.upperLimit, self.lowerLimit, self.sampleTime, self.ptr_output)
         print(f"Out: {self.output}")
-        #print(f"PIDC_T: {self.DW_PIDController_T}")
-        #print(f"RTM_PIDC_T.DWORK: {self.RT_MODEL_PIDController_T.dwork}")
-        #print(f"RTM_PIDC_T: {self.RT_MODEL_PIDController_T}")
+        print(
+            f"RT_MODEL_PIDController_T.ErrorStatus: {self.RT_MODEL_PIDController_T.errorStatus}")
+        print(
+            f"RT_MODEL_PIDController_T.ErrorStatus: {self.RT_MODEL_PIDController_T.dwork}")
         return self.output.value
