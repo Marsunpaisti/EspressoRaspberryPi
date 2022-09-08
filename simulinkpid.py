@@ -77,5 +77,7 @@ class DiscretePid():
         print(
             f"RT_MODEL_PIDController_T.ErrorStatus: {self.RT_MODEL_PIDController_T.errorStatus}")
         print(
-            f"RT_MODEL_PIDController_T.ErrorStatus: {self.RT_MODEL_PIDController_T.dwork}")
+            f"DW_PIDController_T.Integrator_DSTATE: {self.DW_PIDController_T.Integrator_DSTATE}")
+        print(
+            f"DW_PIDController_T.Filter_DSTATE: {self.DW_PIDController_T.Filter_DSTATE}")
         return self.output.value
