@@ -51,6 +51,7 @@ steam_setpoint = 150.0
 brew_setpoint = 94.0
 
 
+
 def setHeaterDutyCycle(dutyCycleFraction: float):
     """
     Sets heater pin PWM duty cycle from dutyCycleFraction between (0-1), mapping it to (0 - 65535) accordingly
@@ -89,8 +90,6 @@ def togglePump(enabled: bool):
 
 consecutiveReadTempFails = 0
 latestValidTemp = 20
-
-
 def readTemperature():
     """
     Returns the MAX31855K temperature in celcius.
