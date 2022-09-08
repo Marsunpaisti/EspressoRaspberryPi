@@ -1,6 +1,7 @@
 import socketio
 import argparse
 from gaggiacontroller import GaggiaController
+from aiohttp import web
 
 parser = argparse.ArgumentParser(description="PID Control and SocketIO server for Gaggia Classic Pro",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -19,9 +20,19 @@ DISABLE_PRINTS = config["disableprints"]
 telemetryAddress = None
 if (DATA_SEND_IP != None):
     telemetryAddress = (DATA_SEND_IP, DATA_SEND_PORT)
-sio = socketio.Server()
-app = socketio.WSGIApp(sio)
+sio = socketio.AsyncServer()
+app = web.Application()
+sio.attach(app)
 gaggiaController = GaggiaController(telemetryAddress, sio)
+
+
+async def index(request):
+    """Serve the client-side application."""
+    with open('./frontend/index.html') as f:
+        return web.Response(text=f.read(), content_type='text/html')
+
+app.router.add_static('/static', 'static')
+app.router.add_get("/", index)
 
 
 def debugPrint(text: str):
@@ -52,3 +63,4 @@ def set_shot_time_limit_handler(sid, data):
 
 if __name__ == "__main__":
     gaggiaController.start()
+    web.run_app(app)
