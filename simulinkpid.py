@@ -65,9 +65,13 @@ class DiscretePid():
         self.error.value = error
         self.sampleTime.value = sampleTime
         print(
-            f"DW_PIDController_T.Integrator_DSTATE: {self.DW_PIDController_T.Integrator_DSTATE}")
+            f"DW_PIDController_T.FILTER: {self.DW_PIDController_T.Filter_DSTATE}")
         print(
-            f"RT_MODEL_PIDController_T.DSTATE: {self.RT_MODEL_PIDController_T.dwork.contents.Filter_DSTATE}")
+            f"DW_PIDController_T.INTEGRATOR: {self.DW_PIDController_T.Integrator_DSTATE}")
+        print(
+            f"RT_MODEL_PIDController_T.FILTER: {self.RT_MODEL_PIDController_T.dwork.contents.Filter_DSTATE}")
+        print(
+            f"RT_MODEL_PIDController_T.INTEGRATOR: {self.RT_MODEL_PIDController_T.dwork.contents.Integrator_DSTATE}")
 
         print(f"Calling PID with err: {self.error}, p: {self.pGain}, i: {self.iGain}, d: {self.dGain}, N: {self.filterCoeff}, iState: {self.integratorState}, fState: {self.filterState}, upperLimit: {self.upperLimit} , lowerLimit: {self.lowerLimit}, Ts: {self.sampleTime}")
         cPID_Step(self.ptr_RT_MODEL_PIDController_T, self.error, self.pGain, self.iGain, self.dGain, self.filterCoeff,
