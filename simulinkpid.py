@@ -81,5 +81,5 @@ class DiscretePid():
         print(
             f"DW_PIDController_T.Filter_DSTATE: {self.DW_PIDController_T.Filter_DSTATE}")
         print(
-            f"RT_MODEL_PIDController_T.DSTATE: {self.RT_MODEL_PIDController_T.dwork.contents.DSTATE}")
+            f"RT_MODEL_PIDController_T.DSTATE: {self.RT_MODEL_PIDController_T.dwork.contents.Filter_DSTATE}")
         return self.output.value
