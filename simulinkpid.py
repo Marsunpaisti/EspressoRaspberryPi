@@ -47,7 +47,12 @@ class DiscretePid():
 
         cPID_Initialize(self.ptr_RT_MODEL_PIDController_T, byref(self.error), byref(self.pGain), byref(self.iGain), byref(self.dGain), byref(self.filterCoeff), byref(
             self.integratorState), byref(self.filterState), byref(self.upperLimit), byref(self.lowerLimit), byref(self.sampleTime), self.ptr_output)
+        print("INITIALIZE")
 
+        print(
+            f"RT_MODEL_PIDController_T.FILTER: {self.RT_MODEL_PIDController_T.dwork.contents.Filter_DSTATE}")
+        print(
+            f"RT_MODEL_PIDController_T.INTEGRATOR: {self.RT_MODEL_PIDController_T.dwork.contents.Integrator_DSTATE}")
         self.setGains(pGain, iGain, dGain, filterCoeff, upperLimit, lowerLimit)
 
     def setGains(self, pGain: float, iGain: float, dGain: float, filterCoeff: float, upperLimit: float, lowerLimit: float):
@@ -72,6 +77,10 @@ class DiscretePid():
             f"RT_MODEL_PIDController_T.FILTER: {self.RT_MODEL_PIDController_T.dwork.contents.Filter_DSTATE}")
         print(
             f"RT_MODEL_PIDController_T.INTEGRATOR: {self.RT_MODEL_PIDController_T.dwork.contents.Integrator_DSTATE}")
+        print(
+            f"SELF.FILTER: {self.filterState}")
+        print(
+            f"SELF.INTEGRATOR: {self.integratorState}")
 
         print(f"Calling PID with err: {self.error}, p: {self.pGain}, i: {self.iGain}, d: {self.dGain}, N: {self.filterCoeff}, iState: {self.integratorState}, fState: {self.filterState}, upperLimit: {self.upperLimit} , lowerLimit: {self.lowerLimit}, Ts: {self.sampleTime}")
         cPID_Step(self.ptr_RT_MODEL_PIDController_T, self.error, self.pGain, self.iGain, self.dGain, self.filterCoeff,
