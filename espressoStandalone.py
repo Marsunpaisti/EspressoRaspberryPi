@@ -118,7 +118,8 @@ def controlLoop():
     brewSwitch = not brewSwitchPin.value
     togglePump(brewSwitch)
 
-    if (time.time() - lastControlTimestamp < SAMPLING_INTERVAL):
+    timeSinceLastSample = time.time() - lastControlTimestamp
+    if (timeSinceLastSample < SAMPLING_INTERVAL):
         return
     i += 1
 
@@ -141,7 +142,7 @@ def controlLoop():
 
     # PID Control
     pidOutput = pidController.step(
-        float(setpoint - boilerTemperature), float(elapsedTime))
+        float(setpoint - boilerTemperature), float(timeSinceLastSample))
 
     # Brew switch feedforward compensator
     compensatorOutput = 0.0
