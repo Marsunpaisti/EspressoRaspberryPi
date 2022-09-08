@@ -161,6 +161,10 @@ def controlLoop():
 
     lastControlTimestamp = time.time()
 
+    # Safety limit
+    if (boilerTemperature > 170):
+        setHeaterDutyCycle(0)
+
 
 def main():
     global sock
