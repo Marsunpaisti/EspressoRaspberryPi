@@ -28,7 +28,6 @@ class RT_MODEL_PIDController_T(Structure):
 class DiscretePid():
     def __init__(self, pGain: float, iGain: float, dGain: float, filterCoeff: float, upperLimit: float, lowerLimit: float) -> None:
         self.DW_PIDController_T = DW_PIDController_T()
-        self.DW_PIDController_T.Integrator_DSTATE.value = 0
         self.RT_MODEL_PIDController_T = RT_MODEL_PIDController_T()
         self.RT_MODEL_PIDController_T.dwork = pointer(self.DW_PIDController_T)
         self.ptr_RT_MODEL_PIDController_T = pointer(
