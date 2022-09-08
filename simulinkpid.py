@@ -6,7 +6,7 @@ import os.path
 dll_name = "DiscredePid.so"
 dllabspath = os.path.dirname(
     os.path.abspath(__file__)) + os.path.sep + dll_name
-libc = CDLL(dllabspath)
+libc = CDLL(dllabspath, mode=RTLD_GLOBAL)
 
 # Rename main functions for readability
 cPID_Initialize = libc.PIDController_initialize
