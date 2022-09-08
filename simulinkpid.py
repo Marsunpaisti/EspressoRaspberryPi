@@ -1,10 +1,10 @@
 from ctypes import *
 import os.path
 
-dll_name = "DiscredePid.so"
+dll_name = "DiscretePid.so"
 dllabspath = os.path.dirname(
     os.path.abspath(__file__)) + os.path.sep + dll_name
-libc = CDLL(dllabspath, mode=RTLD_GLOBAL)
+libc = CDLL(dllabspath)
 
 # Rename main functions for readability
 cPID_Initialize = libc.PIDController_initialize
