@@ -71,7 +71,7 @@ class DiscretePid():
         self.error.value = error
         self.sampleTime.value = sampleTime
         print(
-            "fCalling PID with err: {self.error}, p: {self.pGain}, i: {self.iGain}, d: {self.dGain}, d: {self.filterCoeff}, iState: {self.integratorState}, fState: {self.filterState}, fState: {self.upperLimit} , fState: {self.lowerLimit}, Ts: {self.sampleTime}")
+            f"Calling PID with err: {self.error}, p: {self.pGain}, i: {self.iGain}, d: {self.dGain}, d: {self.filterCoeff}, iState: {self.integratorState}, fState: {self.filterState}, fState: {self.upperLimit} , fState: {self.lowerLimit}, Ts: {self.sampleTime}")
         cPID_Step(self.ptr_RT_MODEL_PIDController_T, self.error, self.pGain, self.iGain, self.dGain, self.filterCoeff,
                   self.integratorState, self.filterState, self.upperLimit, self.lowerLimit, self.sampleTime, byref(self.output))
         return self.output.value
