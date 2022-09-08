@@ -208,7 +208,11 @@ def main():
             pumpPin.value = False
             sock.close()
 
-            time.sleep(0.5)
+            try:
+                time.sleep(0.5)
+            except KeyboardInterrupt:
+                time.sleep(0.5)
+                pass
             os._exit(0)
 
 
