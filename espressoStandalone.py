@@ -165,6 +165,10 @@ def controlLoop():
     if (boilerTemperature > 170):
         setHeaterDutyCycle(0)
 
+    # Debug jesus fuck
+    setHeaterDutyCycle(0)
+    return
+
 
 def main():
     global sock
