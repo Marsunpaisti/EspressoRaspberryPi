@@ -7,7 +7,6 @@ import digitalio
 import pwmio
 import adafruit_max31855
 import socket
-import socketio
 import simulinkpid
 import shelve
 
@@ -36,6 +35,7 @@ heaterPin = pwmio.PWMOut(board.D4, frequency=2,
 
 class GaggiaController():
     def __init__(self, telemetryAddress, sio):
+        self.sock = None
         if (telemetryAddress != None):
             self.telemetryAddress = telemetryAddress
             self.sock = socket.socket(
@@ -232,4 +232,5 @@ class GaggiaController():
         self.__setHeaterDutyCycle(0)
         self.__setPumpEnabled(False)
         self.isRunning = False
-        self.sock.close()
+        if (self.sock != None):
+            self.sock.close()
