@@ -147,7 +147,9 @@ class GaggiaController():
         self.__sendUdpTelemetry(
             boilerTemperature, steamingSwitch, brewSwitch, self.sampleNumber, output)
 
-        res = self.__sendSocketIoTelemetry(boilerTemperature, output, setpoint)
+        telemetryCoroutine = self.__sendSocketIoTelemetry(
+            boilerTemperature, output, setpoint)
+        asyncio.run(telemetryCoroutine)
         return
 
     async def __sendSocketIoTelemetry(self, temperature: float, dutyCycle: float, setpoint: float):
