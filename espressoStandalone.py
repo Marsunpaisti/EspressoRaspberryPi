@@ -183,6 +183,7 @@ def main():
             time.sleep(0.01)
         except KeyboardInterrupt:
             print("Exiting")
+            setHeaterDutyCycle(0)
             sock.close()
             os._exit(0)
 
