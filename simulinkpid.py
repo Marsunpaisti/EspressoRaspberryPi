@@ -28,6 +28,7 @@ class RT_MODEL_PIDController_T(Structure):
 class DiscretePid():
     def __init__(self, pGain: float, iGain: float, dGain: float, filterCoeff: float, upperLimit: float, lowerLimit: float) -> None:
         self.DW_PIDController_T = DW_PIDController_T()
+        self.DW_PIDController_T.Integrator_DSTATE.value = 0
         self.RT_MODEL_PIDController_T = RT_MODEL_PIDController_T()
         self.RT_MODEL_PIDController_T.dwork = pointer(self.DW_PIDController_T)
         self.ptr_RT_MODEL_PIDController_T = pointer(
@@ -58,28 +59,22 @@ class DiscretePid():
         self.upperLimit.value = upperLimit
         self.lowerLimit.value = lowerLimit
 
-    def setIntegratorState(self, integratorState: float):
-        self.integratorState.value = integratorState
-
-    def setFilterState(self, filterState: float):
-        self.filterState.value = filterState
-
     def getOutput(self):
         return self.output.value
 
     def step(self, error: float, sampleTime: float) -> float:
         self.error.value = error
         self.sampleTime.value = sampleTime
-        print(f"Calling PID with err: {self.error}, p: {self.pGain}, i: {self.iGain}, d: {self.dGain}, N: {self.filterCoeff}, iState: {self.integratorState}, fState: {self.filterState}, upperLimit: {self.upperLimit} , lowerLimit: {self.lowerLimit}, Ts: {self.sampleTime}")
-        cPID_Step(self.ptr_RT_MODEL_PIDController_T, self.error, self.pGain, self.iGain, self.dGain, self.filterCoeff,
-                  self.integratorState, self.filterState, self.upperLimit, self.lowerLimit, self.sampleTime, self.ptr_output)
-        print(f"Out: {self.output}")
-        print(
-            f"RT_MODEL_PIDController_T.ErrorStatus: {self.RT_MODEL_PIDController_T.errorStatus}")
         print(
             f"DW_PIDController_T.Integrator_DSTATE: {self.DW_PIDController_T.Integrator_DSTATE}")
         print(
-            f"DW_PIDController_T.Filter_DSTATE: {self.DW_PIDController_T.Filter_DSTATE}")
-        print(
             f"RT_MODEL_PIDController_T.DSTATE: {self.RT_MODEL_PIDController_T.dwork.contents.Filter_DSTATE}")
+
+        print(f"Calling PID with err: {self.error}, p: {self.pGain}, i: {self.iGain}, d: {self.dGain}, N: {self.filterCoeff}, iState: {self.integratorState}, fState: {self.filterState}, upperLimit: {self.upperLimit} , lowerLimit: {self.lowerLimit}, Ts: {self.sampleTime}")
+        cPID_Step(self.ptr_RT_MODEL_PIDController_T, self.error, self.pGain, self.iGain, self.dGain, self.filterCoeff,
+                  self.integratorState, self.filterState, self.upperLimit, self.lowerLimit, self.sampleTime, self.ptr_output)
+
+        self.filterState = self.RT_MODEL_PIDController_T.dwork.contents.Filter_DSTATE
+        self.integratorState = self.RT_MODEL_PIDController_T.dwork.contents.Integrator_DSTATE
+        print(f"Out: {self.output}")
         return self.output.value
