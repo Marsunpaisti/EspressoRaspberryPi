@@ -95,12 +95,12 @@ def readTemperature():
         return latestValidTemp
 
 
-def sendToUdp(temperature: float, steamingSwitchState: int, brewSwitchState: int, msgIndex: int):
+def sendToUdp(temperature: float, steamingSwitchState: int, brewSwitchState: int, msgIndex: int, output: float):
     global latestCommandTimestamp
     global latestTimeoutTimestamp
     global sock
-    bytes = struct.pack("<ifbb", int(msgIndex), temperature, int(
-        steamingSwitchState), int(brewSwitchState))
+    bytes = struct.pack("<ifbbf", int(msgIndex), temperature, int(
+        steamingSwitchState), int(brewSwitchState), float(output))
     if (sock != None and DATA_SEND_IP != None):
         sock.sendto(bytes, (DATA_SEND_IP, DATA_SEND_PORT))
         if (not DISABLE_PRINTS):
@@ -122,8 +122,6 @@ def controlLoop():
     if (timeSinceLastSample < SAMPLING_INTERVAL):
         return
     i += 1
-
-    # Send measurements over UDP
     elapsedTime = time.time() - startedTime
     boilerTemperature = readTemperature()
     heaterDutyCycle = heaterPin.duty_cycle / 65535
@@ -131,7 +129,6 @@ def controlLoop():
 
     if (not DISABLE_PRINTS):
         print(f"T: {elapsedTime:.1f} Temp: {boilerTemperature:.1f} HeaterDutyCycle: {heaterDutyCycle:.2f} Steaming: {steamingSwitch:.0f}")
-    sendToUdp(boilerTemperature, steamingSwitch, brewSwitch, i)
 
     # Setpoint control
     setpoint = brew_setpoint
@@ -163,6 +160,10 @@ def controlLoop():
     # Safety limit
     if (boilerTemperature > 165):
         setHeaterDutyCycle(0)
+
+    # Send measurements over UDP
+    sendToUdp(boilerTemperature, steamingSwitch, brewSwitch, i, output)
+
     return
 
 
