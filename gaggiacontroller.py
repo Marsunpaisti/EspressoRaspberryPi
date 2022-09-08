@@ -206,6 +206,8 @@ class GaggiaController():
             self.__brew_setpoint = setpoint
             with shelve.open("config", ) as cfg:
                 cfg["brew_setpoint"] = setpoint
+
+            debugPrint(f"Brew setpoint set to {setpoint:.1f}")
             return True
         return False
 
@@ -214,6 +216,7 @@ class GaggiaController():
             self.__steam_setpoint = setpoint
             with shelve.open("config", ) as cfg:
                 cfg["steam_setpoint"] = setpoint
+            debugPrint(f"Steam setpoint set to {setpoint:.1f}")
             return True
         return False
 
@@ -222,6 +225,7 @@ class GaggiaController():
             self.__shot_time_limit = limitSeconds
             with shelve.open("config", ) as cfg:
                 cfg["shot_time_limit"] = limitSeconds
+            debugPrint(f"Shot time limit set to {limitSeconds:.1f}")
             return True
         return False
 

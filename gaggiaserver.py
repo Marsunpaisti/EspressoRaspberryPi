@@ -63,4 +63,4 @@ def set_shot_time_limit_handler(sid, data):
 
 if __name__ == "__main__":
     gaggiaController.start()
-    web.run_app(app)
+    web.run_app(app, port=80)
