@@ -43,7 +43,7 @@ heaterPin = pwmio.PWMOut(board.D4, frequency=2,
 latestCommandTimestamp = time.time()
 latestTimeoutTimestamp = time.time()
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-lastControlTimestamp = 0.0
+lastControlTimestamp = time.time()
 startedTime = time.time()
 pidController = simulinkpid.DiscretePid(0.046, 0.0018, -0.0030, 3.168544, 1, 0)
 i = 0
