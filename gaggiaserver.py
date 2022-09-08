@@ -28,10 +28,10 @@ gaggiaController = GaggiaController(telemetryAddress, sio)
 
 async def index(request):
     """Serve the client-side application."""
-    with open('./frontend/index.html') as f:
+    with open('./frontendBuild/index.html') as f:
         return web.Response(text=f.read(), content_type='text/html')
 
-app.router.add_static('/static', 'static')
+app.router.add_static('/static', './frontendBuild/static')
 app.router.add_get("/", index)
 
 

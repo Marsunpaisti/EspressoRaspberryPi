@@ -1,0 +1,12 @@
+{
+  "files": {
+    "main.css": "/marsunpaisti/static/css/main.31d6cfe0.css",
+    "main.js": "/marsunpaisti/static/js/main.aca8a255.js",
+    "index.html": "/marsunpaisti/index.html",
+    "main.aca8a255.js.map": "/marsunpaisti/static/js/main.aca8a255.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.31d6cfe0.css",
+    "static/js/main.aca8a255.js"
+  ]
+}
