@@ -37,7 +37,7 @@ brewSwitchPin.switch_to_input(pull=digitalio.Pull.UP)
 pumpPin = digitalio.DigitalInOut(board.D26)
 pumpPin.switch_to_output(False)
 heaterPin = pwmio.PWMOut(board.D4, frequency=2,
-                         duty_cycle=0, variable_frequency=False)
+                         duty_cycle=0, variable_frequency=True)
 
 
 latestCommandTimestamp = time.time()
@@ -172,7 +172,7 @@ def controlLoop():
     if (output < 0):
         output = 0
 
-    # setHeaterDutyCycle(output)
+    setHeaterDutyCycle(output)
     lastControlTimestamp = time.time()
 
     # Safety limit
@@ -180,9 +180,7 @@ def controlLoop():
         setHeaterDutyCycle(0)
 
     # Send measurements over UDP
-    setHeaterDutyCycle(0)
     sendToUdp(boilerTemperature, steamingSwitch, brewSwitch, i, output)
-
     return
 
 
@@ -191,7 +189,7 @@ def main():
     print(f"Starting EspressoPi")
     if (DATA_SEND_IP):
         print(f"UDP Data send address set to {(DATA_SEND_IP,DATA_SEND_PORT)}")
-    threading.Thread(target=listenForUdpCommands, args=(sock,)).start()
+    #threading.Thread(target=listenForUdpCommands, args=(sock,)).start()
 
     while True:
         try:
@@ -204,8 +202,13 @@ def main():
             time.sleep(0.01)
         except KeyboardInterrupt:
             print("Exiting")
+            heaterPin.frequency = 50000
             setHeaterDutyCycle(0)
+            heaterPin.deinit()
+            pumpPin.value = False
             sock.close()
+
+            time.sleep(0.5)
             os._exit(0)
 
 
