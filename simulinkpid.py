@@ -1,7 +1,12 @@
 from ctypes import *
 from tkinter.messagebox import NO
 from tokenize import Double
-libc = CDLL("./CodegenPid/DiscredePid.so")
+import os.path
+
+dll_name = "DiscredePid.so"
+dllabspath = os.path.dirname(
+    os.path.abspath(__file__)) + os.path.sep + dll_name
+libc = CDLL(dllabspath)
 
 # Rename main functions for readability
 cPID_Initialize = libc.PIDController_initialize
