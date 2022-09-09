@@ -1,8 +1,8 @@
 import threading
 import socketio
 import argparse
+from eventlet import wsgi, listen
 from gaggiacontroller import GaggiaController
-from aiohttp import web
 
 
 parser = argparse.ArgumentParser(description="PID Control and SocketIO server for Gaggia Classic Pro",
@@ -22,19 +22,17 @@ DISABLE_PRINTS = config["disableprints"]
 telemetryAddress = None
 if (DATA_SEND_IP != None):
     telemetryAddress = (DATA_SEND_IP, DATA_SEND_PORT)
-sio = socketio.AsyncServer()
-app = web.Application()
-sio.attach(app)
+
+# create a Socket.IO server
+sio = socketio.Server()
+# wrap with a WSGI application
+app = socketio.WSGIApp(sio)
 gaggiaController = GaggiaController(telemetryAddress, sio, DISABLE_PRINTS)
 
-
-async def index(request):
-    """Serve the client-side application."""
-    with open('./frontendBuild/index.html') as f:
-        return web.Response(text=f.read(), content_type='text/html')
-
-app.router.add_static('/static', './frontendBuild/static')
-app.router.add_get("/", index)
+app.static_files = {
+    "/": "./frontendBuild/index.html",
+    "/static": "./frontendBuild"
+}
 
 
 def debugPrint(text: str):
@@ -64,14 +62,10 @@ def set_shot_time_limit_handler(sid, data):
 
 
 def startListening():
-    web.run_app(app, port=8080)
+    wsgi.server(listen(("", 80)), app)
 
 
 if __name__ == "__main__":
     gaggiaController.start()
-    # listenerThread = threading.Thread(
-    #    target=startListening, args=())
-    # listenerThread.start()
-    # listenerThread.join()
     startListening()
     gaggiaController.controlLoopThread.join()
