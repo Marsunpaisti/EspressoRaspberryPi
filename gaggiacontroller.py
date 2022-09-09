@@ -32,10 +32,20 @@ pumpPin = digitalio.DigitalInOut(board.D26)
 pumpPin.switch_to_output(False)
 heaterPin = pwmio.PWMOut(board.D4, frequency=2,
                          duty_cycle=0, variable_frequency=False)
+DISABLE_PRINTS = False
+
+
+def debugPrint(text: str):
+    if (DISABLE_PRINTS):
+        return
+    print(text)
 
 
 class GaggiaController():
-    def __init__(self, telemetryAddress, sio):
+    def __init__(self, telemetryAddress, sio, disablePrints):
+        global DISABLE_PRINTS
+        self.disablePrints = disablePrints
+        DISABLE_PRINTS = disablePrints
         self.sock = None
         if (telemetryAddress != None):
             self.telemetryAddress = telemetryAddress
@@ -100,6 +110,7 @@ class GaggiaController():
         timeSinceLastSample = time.time() - self.lastSampleTimestamp
         if (timeSinceLastSample < SAMPLING_INTERVAL):
             return
+        debugPrint("Running control loop sample")
 
         self.lastSampleTimestamp = time.time()
         self.sampleNumber += 1
@@ -159,6 +170,7 @@ class GaggiaController():
         telemetryData["temperature"] = temperature
         telemetryData["dutyCycle"] = dutyCycle
         telemetryData["setpoint"] = setpoint
+        debugPrint("Sent socketIo telemetry")
         await self.sio.emit("telemetry", telemetryData)
 
     def __sendUdpTelemetry(self, temperature: float, steamingSwitchState: int, brewSwitchState: int, msgIndex: int, output: float):

@@ -23,7 +23,7 @@ if (DATA_SEND_IP != None):
 sio = socketio.AsyncServer()
 app = web.Application()
 sio.attach(app)
-gaggiaController = GaggiaController(telemetryAddress, sio)
+gaggiaController = GaggiaController(telemetryAddress, sio, DISABLE_PRINTS)
 
 
 async def index(request):
