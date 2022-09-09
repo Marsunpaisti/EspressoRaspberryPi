@@ -62,6 +62,12 @@ def set_shot_time_limit_handler(sid, data):
     return gaggiaController.setShotTimeLimit(data)
 
 
+@sio.on("test_print")
+def test_print_handler(sid, data):
+    print(f"test_print {data}")
+    return "ack"
+
+
 def startListening():
     wsgi.server(listen(("", 80)), app)
 
