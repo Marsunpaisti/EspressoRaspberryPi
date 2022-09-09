@@ -1,8 +1,8 @@
 import socketio
-import eventlet
 import argparse
 from gaggiacontroller import GaggiaController
 from aiohttp import web
+
 
 parser = argparse.ArgumentParser(description="PID Control and SocketIO server for Gaggia Classic Pro",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
