@@ -71,5 +71,6 @@ if __name__ == "__main__":
     gaggiaController.start()
     listenerThread = threading.Thread(
         target=startListening, args=())
+    listenerThread.start()
     listenerThread.join()
     gaggiaController.controlLoopThread.join()
