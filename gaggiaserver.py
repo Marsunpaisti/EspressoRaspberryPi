@@ -1,4 +1,5 @@
 import threading
+from time import sleep
 import socketio
 import argparse
 from eventlet import wsgi, listen
@@ -65,7 +66,19 @@ def startListening():
     wsgi.server(listen(("", 80)), app)
 
 
+def send_test_signals():
+    sleep(1)
+    for i in range(1, 1000000):
+        sleep(1)
+        telemetryData = {}
+        telemetryData["temperature"] = i
+        telemetryData["dutyCycle"] = 0
+        telemetryData["setpoint"] = 0
+        sio.emit("telemetry", telemetryData)
+
+
 if __name__ == "__main__":
     # gaggiaController.start()
+    threading.Thread(target=send_test_signals, args=()).start()
     startListening()
     # gaggiaController.controlLoopThread.join()
