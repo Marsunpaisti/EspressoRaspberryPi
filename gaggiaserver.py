@@ -66,6 +66,6 @@ def startListening():
 
 
 if __name__ == "__main__":
-    gaggiaController.start()
+    # gaggiaController.start()
     startListening()
-    gaggiaController.controlLoopThread.join()
+    # gaggiaController.controlLoopThread.join()
