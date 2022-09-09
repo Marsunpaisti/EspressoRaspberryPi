@@ -68,7 +68,7 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
         ];
       });
     });
-    setTimeout(() => {
+    setInterval(() => {
       if (socket.connected) {
         socket.emit('test_print', Date.now().toString(), (response: any) => {
           console.log('test_print response: ' + response);
