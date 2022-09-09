@@ -10,7 +10,6 @@ import adafruit_max31855
 import socket
 import simulinkpid
 import shelve
-import asyncio
 
 SAMPLING_INTERVAL = 0.5
 P_GAIN = 0.046
@@ -164,19 +163,17 @@ class GaggiaController():
             boilerTemperature, steamingSwitch, brewSwitch, self.sampleNumber, output)
 
         if (self.sampleNumber % 4 == 0):
-            telemetryCoroutine = self.__sendSocketIoTelemetry(
-                boilerTemperature, output, setpoint)
-            asyncio.run(telemetryCoroutine)
+            self.__sendSocketIoTelemetry(boilerTemperature, output, setpoint)
         return
 
-    async def __sendSocketIoTelemetry(self, temperature: float, dutyCycle: float, setpoint: float):
+    def __sendSocketIoTelemetry(self, temperature: float, dutyCycle: float, setpoint: float):
         if (self.sio == None):
             return
         telemetryData = {}
         telemetryData["temperature"] = temperature
         telemetryData["dutyCycle"] = dutyCycle
         telemetryData["setpoint"] = setpoint
-        await self.sio.emit("telemetry", telemetryData)
+        self.sio.emit("telemetry", telemetryData)
 
     def __sendUdpTelemetry(self, temperature: float, steamingSwitchState: int, brewSwitchState: int, msgIndex: int, output: float):
         if (self.sock == None):
