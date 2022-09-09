@@ -25,7 +25,7 @@ if (DATA_SEND_IP != None):
     telemetryAddress = (DATA_SEND_IP, DATA_SEND_PORT)
 
 # create a Socket.IO server
-sio = socketio.Server()
+sio = socketio.Server(async_mode="eventlet")
 # wrap with a WSGI application
 app = socketio.WSGIApp(sio)
 gaggiaController = GaggiaController(telemetryAddress, sio, DISABLE_PRINTS)
