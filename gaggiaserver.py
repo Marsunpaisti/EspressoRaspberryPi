@@ -1,3 +1,4 @@
+import threading
 import socketio
 import argparse
 from gaggiacontroller import GaggiaController
@@ -62,6 +63,13 @@ def set_shot_time_limit_handler(sid, data):
     return gaggiaController.setShotTimeLimit(data)
 
 
+def startListening():
+    web.run_app(app, port=8080)
+
+
 if __name__ == "__main__":
     gaggiaController.start()
-    web.run_app(app, port=8080)
+    listenerThread = threading.Thread(
+        target=startListening, args=())
+    listenerThread.join()
+    gaggiaController.controlLoopThread.join()
