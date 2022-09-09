@@ -1,3 +1,4 @@
+import os
 import struct
 import threading
 import time
@@ -95,22 +96,26 @@ class GaggiaController():
 
                 self.__controlLoopLogic()
             except Exception as e:
-                self.__setHeaterDutyCycle(0)
-                raise e
+                print(e)
+                self.__disableOutputsAndExit()
 
             try:
                 time.sleep(0.01)
             except KeyboardInterrupt:
-                self.isRunning = False
-                self.__setHeaterDutyCycle(0)
-                self.__setPumpEnabled(False)
-                heaterPin.deinit()
+                self.__disableOutputsAndExit()
+
+    def __disableOutputsAndExit(self):
+        self.isRunning = False
+        self.__setHeaterDutyCycle(0)
+        self.__setPumpEnabled(False)
+        heaterPin.deinit()
+        pumpPin.deinit()
+        os._exit(1)
 
     def __controlLoopLogic(self):
         timeSinceLastSample = time.time() - self.lastSampleTimestamp
         if (timeSinceLastSample < SAMPLING_INTERVAL):
             return
-        debugPrint("Running control loop sample")
 
         self.lastSampleTimestamp = time.time()
         self.sampleNumber += 1
@@ -170,7 +175,6 @@ class GaggiaController():
         telemetryData["temperature"] = temperature
         telemetryData["dutyCycle"] = dutyCycle
         telemetryData["setpoint"] = setpoint
-        debugPrint("Sent socketIo telemetry")
         await self.sio.emit("telemetry", telemetryData)
 
     def __sendUdpTelemetry(self, temperature: float, steamingSwitchState: int, brewSwitchState: int, msgIndex: int, output: float):
