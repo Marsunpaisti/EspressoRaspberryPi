@@ -31,7 +31,7 @@ gaggiaController = GaggiaController(telemetryAddress, sio, DISABLE_PRINTS)
 
 app.static_files = {
     "/": "./frontendBuild/index.html",
-    "/static": "./frontendBuild"
+    "/static": "./frontendBuild/static"
 }
 
 
