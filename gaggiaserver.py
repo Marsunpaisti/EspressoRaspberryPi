@@ -1,4 +1,5 @@
 import socketio
+import eventlet
 import argparse
 from gaggiacontroller import GaggiaController
 from aiohttp import web
@@ -20,7 +21,7 @@ DISABLE_PRINTS = config["disableprints"]
 telemetryAddress = None
 if (DATA_SEND_IP != None):
     telemetryAddress = (DATA_SEND_IP, DATA_SEND_PORT)
-sio = socketio.AsyncServer(Logger=True)
+sio = socketio.AsyncServer()
 app = web.Application()
 sio.attach(app)
 gaggiaController = GaggiaController(telemetryAddress, sio, DISABLE_PRINTS)
