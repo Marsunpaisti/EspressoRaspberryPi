@@ -73,14 +73,14 @@ def startListening():
 
 
 def send_test_signals():
-    sleep(5)
+    sleep(2)
     for i in range(1, 1000000):
-        sleep(5)
+        sleep(2)
         telemetryData = {}
         telemetryData["temperature"] = i
         telemetryData["dutyCycle"] = 0
         telemetryData["setpoint"] = 0
-        sio.emit("telemetry", telemetryData)
+        sio.emit("telemetry", "foo")
         print("sent")
 
 

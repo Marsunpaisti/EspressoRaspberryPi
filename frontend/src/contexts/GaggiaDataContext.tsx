@@ -79,11 +79,13 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
     }, 3000);
     */
 
+    /*
     return () => {
       socket.off('connect');
       socket.off('disconnect');
       socket.off('telemetry');
     };
+    */
   }, []);
 
   return (
