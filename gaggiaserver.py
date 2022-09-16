@@ -64,7 +64,7 @@ def set_shot_time_limit_handler(sid, data):
 
 @sio.on("test_print")
 def test_print_handler(sid, data):
-    print(f"test_print {data}")
+    print(f"tp {data}")
     return "ack"
 
 
@@ -74,14 +74,14 @@ def startListening():
 
 def send_test_signals():
     sleep(2)
-    for i in range(1, 1000000):
-        sleep(2)
+    for i in range(1, 200):
         telemetryData = {}
         telemetryData["temperature"] = i
         telemetryData["dutyCycle"] = 0
         telemetryData["setpoint"] = 0
         sio.emit("telemetry", "foo")
-        print("sent")
+        print("s")
+        sleep(2)
 
 
 if __name__ == "__main__":
