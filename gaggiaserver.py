@@ -65,6 +65,7 @@ def set_shot_time_limit_handler(sid, data):
 @sio.on("test_print")
 def test_print_handler(sid, data):
     print(f"tp {data}")
+    sio.emit("telemetry", "foo")
     return "ack"
 
 
