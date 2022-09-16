@@ -86,6 +86,8 @@ def send_test_signals():
 
 if __name__ == "__main__":
     # gaggiaController.start()
-    threading.Thread(target=send_test_signals, args=()).start()
+    testSignalsThread = threading.Thread(target=send_test_signals, args=())
+    testSignalsThread.start()
     startListening()
+    testSignalsThread.join()
     # gaggiaController.controlLoopThread.join()
