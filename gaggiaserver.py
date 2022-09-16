@@ -81,6 +81,7 @@ def send_test_signals():
         telemetryData["dutyCycle"] = 0
         telemetryData["setpoint"] = 0
         sio.emit("telemetry", telemetryData)
+        print("sent")
 
 
 if __name__ == "__main__":
