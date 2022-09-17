@@ -2,8 +2,11 @@ import threading
 from time import sleep
 import socketio
 import argparse
-from eventlet import wsgi, listen
+from eventlet import wsgi, listen, monkey_patch
 from gaggiacontroller import GaggiaController
+
+monkey_patch()
+print(f"Monkeypatched: {threading.current_thread.__module__}")
 
 
 parser = argparse.ArgumentParser(description="PID Control and SocketIO server for Gaggia Classic Pro",
