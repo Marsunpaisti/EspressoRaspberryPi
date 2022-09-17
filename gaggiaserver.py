@@ -16,7 +16,7 @@ parser.add_argument("-i", "--ip", action="store",
 parser.add_argument("-p", "--port", action="store",
                     help="Send UDP telemetry to port", default=7788)
 parser.add_argument("-d", "--disableprints", action="store_true",
-                    help="Disable prints", default=False),
+                    help="Disable prints", default=False)
 args = parser.parse_args()
 config = vars(args)
 DATA_SEND_IP = config["ip"]
@@ -31,6 +31,7 @@ if (DATA_SEND_IP != None):
 sio = socketio.Server(async_mode="eventlet")
 # wrap with a WSGI application
 app = socketio.WSGIApp(sio)
+gaggiaController = GaggiaController(telemetryAddress, sio, DISABLE_PRINTS)
 
 app.static_files = {
     "/": "./frontendBuild/index.html",
@@ -49,27 +50,24 @@ def connect(sid, environ):
     debugPrint(f"New connection: {sid}")
 
 
-#gaggiaController = GaggiaController(telemetryAddress, sio, DISABLE_PRINTS)
-
-# @sio.on("set_brew_setpoint")
-# def set_brew_setpoint_handler(sid, data):
-#     return gaggiaController.setBrewSetpoint(data)
+@sio.on("set_brew_setpoint")
+def set_brew_setpoint_handler(sid, data):
+    return gaggiaController.setBrewSetpoint(data)
 
 
-# @sio.on("set_steam_setpoint")
-# def set_steam_setpoint_handler(sid, data):
-#     return gaggiaController.setSteamSetpoint(data)
+@sio.on("set_steam_setpoint")
+def set_steam_setpoint_handler(sid, data):
+    return gaggiaController.setSteamSetpoint(data)
 
 
-# @sio.on("set_shot_time_limit")
-# def set_shot_time_limit_handler(sid, data):
-#     return gaggiaController.setShotTimeLimit(data)
+@sio.on("set_shot_time_limit")
+def set_shot_time_limit_handler(sid, data):
+    return gaggiaController.setShotTimeLimit(data)
 
 
 @sio.on("test_print")
 def test_print_handler(sid, data):
     print(f"tp {data}")
-    sio.emit("telemetry", "foo")
     return "ack"
 
 
@@ -84,7 +82,7 @@ def send_test_signals():
         telemetryData["temperature"] = i
         telemetryData["dutyCycle"] = 0
         telemetryData["setpoint"] = 0
-        sio.emit("telemetry", "foo")
+        sio.emit("telemetry", f"foo {i}")
         print("s")
         sio.sleep(2)
 
