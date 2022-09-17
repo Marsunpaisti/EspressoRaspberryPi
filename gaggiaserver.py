@@ -80,7 +80,8 @@ def send_test_signals():
     sio.sleep(3)
     for i in range(1, 2000):
         telemetryData = {}
-        telemetryData["temperature"] = math.sin(time()) * 90 + 25
+        telemetryData["temperature"] = math.sin(
+            time() * (2*math.pi / 120)) * 40 + 60
         telemetryData["dutyCycle"] = 0
         telemetryData["setpoint"] = 0
         sio.emit("telemetry", telemetryData)
