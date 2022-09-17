@@ -28,7 +28,6 @@ if (DATA_SEND_IP != None):
 sio = socketio.Server(async_mode="eventlet")
 # wrap with a WSGI application
 app = socketio.WSGIApp(sio)
-gaggiaController = GaggiaController(telemetryAddress, sio, DISABLE_PRINTS)
 
 app.static_files = {
     "/": "./frontendBuild/index.html",
@@ -47,19 +46,21 @@ def connect(sid, environ):
     debugPrint(f"New connection: {sid}")
 
 
-@sio.on("set_brew_setpoint")
-def set_brew_setpoint_handler(sid, data):
-    return gaggiaController.setBrewSetpoint(data)
+#gaggiaController = GaggiaController(telemetryAddress, sio, DISABLE_PRINTS)
+
+# @sio.on("set_brew_setpoint")
+# def set_brew_setpoint_handler(sid, data):
+#     return gaggiaController.setBrewSetpoint(data)
 
 
-@sio.on("set_steam_setpoint")
-def set_steam_setpoint_handler(sid, data):
-    return gaggiaController.setSteamSetpoint(data)
+# @sio.on("set_steam_setpoint")
+# def set_steam_setpoint_handler(sid, data):
+#     return gaggiaController.setSteamSetpoint(data)
 
 
-@sio.on("set_shot_time_limit")
-def set_shot_time_limit_handler(sid, data):
-    return gaggiaController.setShotTimeLimit(data)
+# @sio.on("set_shot_time_limit")
+# def set_shot_time_limit_handler(sid, data):
+#     return gaggiaController.setShotTimeLimit(data)
 
 
 @sio.on("test_print")
@@ -74,7 +75,7 @@ def startListening():
 
 
 def send_test_signals():
-    sleep(2)
+    sio.sleep(2)
     for i in range(1, 200):
         telemetryData = {}
         telemetryData["temperature"] = i
@@ -82,7 +83,7 @@ def send_test_signals():
         telemetryData["setpoint"] = 0
         sio.emit("telemetry", "foo")
         print("s")
-        sleep(2)
+        sio.sleep(2)
 
 
 if __name__ == "__main__":
