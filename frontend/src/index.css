@@ -5,6 +5,8 @@
 html,
 body,
 #root {
+  font-family: 'Source Sans Pro', 'Roboto';
+  color: #fdfdfd;
   display: flex;
   flex-direction: column;
   align-items: center;

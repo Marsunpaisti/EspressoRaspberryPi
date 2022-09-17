@@ -1,5 +1,6 @@
+import math
 import threading
-from time import sleep
+from time import time
 import socketio
 import argparse
 from eventlet import wsgi, listen, monkey_patch
@@ -77,9 +78,9 @@ def startListening():
 
 def send_test_signals():
     sio.sleep(3)
-    for i in range(1, 200):
+    for i in range(1, 2000):
         telemetryData = {}
-        telemetryData["temperature"] = i
+        telemetryData["temperature"] = math.sin(time()) * 90 + 25
         telemetryData["dutyCycle"] = 0
         telemetryData["setpoint"] = 0
         sio.emit("telemetry", telemetryData)

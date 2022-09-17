@@ -1,9 +1,21 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 
-const socket = io({
+const host =
+  process.env.NODE_ENV === 'development'
+    ? 'http://kahvipi.local'
+    : window.location.protocol +
+      '//' +
+      window.location.hostname +
+      ':' +
+      window.location.port;
+
+const socket = io(host, {
   transports: ['websocket'],
 });
+
+console.log('SocketIO Host: ' + host);
+console.log('NODE_ENV: ' + process.env.NODE_ENV);
 
 export interface TemperatureReading {
   timestamp: Date;
@@ -47,7 +59,7 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
     socket.on('connect', () => setSocketConnected(true));
     socket.on('disconnect', () => setSocketConnected(false));
     socket.on('telemetry', (data: ITelemetry) => {
-      console.log('Received telemetry: ' + data);
+      console.log('Received telemetry: ' + JSON.stringify(data, undefined, 2));
       const ts = new Date();
 
       if (data.setpoint != undefined) {

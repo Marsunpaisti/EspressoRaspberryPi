@@ -10,6 +10,9 @@ import adafruit_max31855
 import socket
 import simulinkpid
 import shelve
+import eventlet
+
+eventlet.monkey_patch()
 
 SAMPLING_INTERVAL = 0.5
 P_GAIN = 0.046

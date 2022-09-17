@@ -1,11 +1,10 @@
 import { GaggiaDataContextProvider } from '../contexts/GaggiaDataContext';
-import { GaggiaDataGraph } from './GaggiaDataGraph';
+import { MainRouter } from './MainRouter';
 
 export const App = () => {
   return (
     <GaggiaDataContextProvider>
-      <div className="text-2xl font-bold">Hello world!</div>
-      <GaggiaDataGraph />
+      <MainRouter />
     </GaggiaDataContextProvider>
   );
 };
