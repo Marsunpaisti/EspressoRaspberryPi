@@ -47,43 +47,39 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
     socket.on('connect', () => setSocketConnected(true));
     socket.on('disconnect', () => setSocketConnected(false));
     socket.on('telemetry', (data: ITelemetry) => {
-      console.log(data);
+      console.log('Received telemetry: ' + data);
       const ts = new Date();
-      setSetpointReadings((prev) => {
-        return [
-          ...prev,
-          {
-            timestamp: ts,
-            setpoint: data.setpoint,
-          },
-        ];
-      });
-      setTemperatureReadings((prev) => {
-        return [
-          ...prev,
-          {
-            timestamp: ts,
-            temperature: data.temperature,
-          },
-        ];
-      });
-    });
 
-    setInterval(() => {
-      if (socket.connected) {
-        socket.emit('test_print', Date.now().toString(), (response: any) => {
-          console.log('test_print response: ' + response);
+      if (data.setpoint != undefined) {
+        setSetpointReadings((prev) => {
+          return [
+            ...prev,
+            {
+              timestamp: ts,
+              setpoint: data.setpoint,
+            },
+          ];
         });
       }
-    }, 8000);
 
-    /*
+      if (data.temperature != undefined) {
+        setTemperatureReadings((prev) => {
+          return [
+            ...prev,
+            {
+              timestamp: ts,
+              temperature: data.temperature,
+            },
+          ];
+        });
+      }
+    });
+
     return () => {
       socket.off('connect');
       socket.off('disconnect');
       socket.off('telemetry');
     };
-    */
   }, []);
 
   return (

@@ -28,7 +28,7 @@ if (DATA_SEND_IP != None):
     telemetryAddress = (DATA_SEND_IP, DATA_SEND_PORT)
 
 # create a Socket.IO server
-sio = socketio.Server(async_mode="eventlet")
+sio = socketio.Server(async_mode="eventlet", cors_allowed_origins="*")
 # wrap with a WSGI application
 app = socketio.WSGIApp(sio)
 gaggiaController = GaggiaController(telemetryAddress, sio, DISABLE_PRINTS)
@@ -76,15 +76,14 @@ def startListening():
 
 
 def send_test_signals():
-    sio.sleep(2)
+    sio.sleep(3)
     for i in range(1, 200):
         telemetryData = {}
         telemetryData["temperature"] = i
         telemetryData["dutyCycle"] = 0
         telemetryData["setpoint"] = 0
-        sio.emit("telemetry", f"foo {i}")
-        print("s")
-        sio.sleep(2)
+        sio.emit("telemetry", telemetryData)
+        sio.sleep(1)
 
 
 if __name__ == "__main__":
