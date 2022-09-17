@@ -59,8 +59,10 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
     socket.on('connect', () => setSocketConnected(true));
     socket.on('disconnect', () => setSocketConnected(false));
     socket.on('telemetry', (data: ITelemetry) => {
-      console.log('Received telemetry: ' + JSON.stringify(data, undefined, 2));
       const ts = new Date();
+      console.log(
+        'Received telemetry: ' + JSON.stringify({ ...data, ts }, undefined, 2),
+      );
 
       if (data.setpoint != undefined) {
         setSetpointReadings((prev) => {
