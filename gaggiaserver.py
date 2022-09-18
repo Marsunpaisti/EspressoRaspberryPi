@@ -115,8 +115,8 @@ if __name__ == "__main__":
         target=startListening, args=(), daemon=True)
     serverThread.start()
 
-    # testSignalsThread = threading.Thread(target=mockTelemetrySender, args=())
-    # testSignalsThread.start()
-    # testSignalsThread.join()
-    gaggiaController.start()
-    gaggiaController.controlLoopThread.join()
+    testSignalsThread = threading.Thread(target=mockTelemetrySender, args=())
+    testSignalsThread.start()
+    testSignalsThread.join()
+    # gaggiaController.start()
+    # gaggiaController.controlLoopThread.join()
