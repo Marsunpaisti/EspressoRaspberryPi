@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import {
   GaggiaDataContext,
-  TemperatureReading,
+  ITelemetryData,
 } from '../contexts/GaggiaDataContext';
 import { scaleTime, scaleLinear } from '@visx/scale';
 import { extent, max, min } from 'd3-array';
@@ -12,13 +12,13 @@ import { GridRows, GridColumns } from '@visx/grid';
 import { AxisLeft, AxisBottom } from '@visx/axis';
 import useMeasure from 'react-use-measure';
 
-const getX = (d: TemperatureReading) => d.timestamp;
-const getY = (d: TemperatureReading) => d.temperature;
+const getX = (d: ITelemetryData) => d.timestamp;
+const getY = (d: ITelemetryData) => d.temperature;
 const TemperatureChart = ({
   temperatureReadings,
   timeHorizonMs,
 }: {
-  temperatureReadings: TemperatureReading[];
+  temperatureReadings: ITelemetryData[];
   timeHorizonMs: number;
 }) => {
   const [ref, bounds] = useMeasure();
@@ -31,10 +31,11 @@ const TemperatureChart = ({
       latestTemperatureData.timestamp.getTime() - timeHorizonMs,
   );
 
-  const gridTickRowValues = [];
-  for (let i = 0; i <= 50; i++) {
-    gridTickRowValues.push(i * 5);
-  }
+  const margin = { top: 40, right: 30, bottom: 50, left: 40 };
+  const { width, height } = bounds;
+  const xMax = width - margin.left - margin.right;
+  const yMax = height - margin.top - margin.bottom;
+
   const timeDomain = extent(temperatureData, getX) as [Date, Date];
   timeDomain[1] = new Date(
     Math.max(
@@ -44,34 +45,39 @@ const TemperatureChart = ({
   );
   const xScale = scaleTime<number>({
     domain: timeDomain,
-    range: [0, bounds?.width ?? 0],
+    range: [0, xMax],
   });
 
   const temperatureDomain = [
-    Math.max(20, min(temperatureData, getY)! - 20),
-    Math.min(170, max(temperatureData, getY)! + 20),
+    Math.max(0, min(temperatureData, getY)! - 10),
+    Math.min(180, max(temperatureData, getY)! + 10),
   ];
   const temperatureYScale = scaleLinear<number>({
     domain: temperatureDomain,
-    range: [bounds?.height ?? 0, 0],
+    range: [0, yMax],
+    reverse: true,
   });
-
-  console.log('XRange: ' + xScale.range());
-  console.log('YRange: ' + temperatureYScale.range());
 
   return (
     <div className="rounded overflow-hidden shadow-paper max-w-[800px] max-h-[500px] flex flex-1">
       <svg className="bg-stone-400 flex flex-col flex-1 w-full" ref={ref}>
         {bounds && (
           <>
-            <GridRows
-              scale={temperatureYScale}
-              width={bounds!.width}
-              height={bounds!.height}
-              stroke="#CACACA"
-              tickValues={gridTickRowValues}
-            />
-            <Group left={0} top={0}>
+            <Group left={margin.left} top={margin.top}>
+              <GridRows
+                scale={temperatureYScale}
+                width={xMax}
+                height={yMax}
+                stroke="#cacaca"
+              />
+              <GridColumns
+                scale={xScale}
+                width={xMax}
+                height={yMax}
+                stroke="#cacaca"
+              />
+              <AxisBottom scale={xScale} top={yMax} />
+              <AxisLeft scale={temperatureYScale} />
               <LinePath
                 data={temperatureData}
                 x={(d) => xScale(getX(d))}
@@ -89,7 +95,7 @@ const TemperatureChart = ({
 };
 
 export const GaggiaDataView = () => {
-  const { temperatureReadings } = useContext(GaggiaDataContext);
+  const { telemetryData: temperatureReadings } = useContext(GaggiaDataContext);
 
   if (temperatureReadings.length < 2) {
     return <SpinnerView text="Waiting for data..." />;

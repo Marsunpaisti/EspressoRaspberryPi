@@ -17,23 +17,19 @@ const socket = io(host, {
 console.log('SocketIO Host: ' + host);
 console.log('NODE_ENV: ' + process.env.NODE_ENV);
 
-export interface TemperatureReading {
+export interface ITelemetryData {
   timestamp: Date;
   temperature: number;
-}
-export interface SetpointReading {
-  timestamp: Date;
   setpoint: number;
 }
 
 export interface ITelemetry {
+  timestamp: number;
   temperature: number;
-  setpoint: number;
 }
 
 export interface IGaggiaDataContext {
-  temperatureReadings: TemperatureReading[];
-  setpointReadings: SetpointReading[];
+  telemetryData: ITelemetryData[];
   brewTimer?: number;
   socketConnected: boolean;
 }
@@ -47,46 +43,26 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
 }) => {
   const [socketConnected, setSocketConnected] = useState(false);
 
-  const [temperatureReadings, setTemperatureReadings] = useState<
-    TemperatureReading[]
-  >([]);
-
-  const [setpointReadings, setSetpointReadings] = useState<SetpointReading[]>(
-    [],
-  );
+  const [telemetryData, setTelemetryData] = useState<ITelemetryData[]>([]);
 
   useEffect(() => {
     socket.on('connect', () => setSocketConnected(true));
     socket.on('disconnect', () => setSocketConnected(false));
-    socket.on('telemetry', (data: ITelemetry) => {
-      const ts = new Date();
+    socket.on('telemetry', (data: ITelemetryData) => {
       console.log(
-        'Received telemetry: ' + JSON.stringify({ ...data, ts }, undefined, 2),
+        'Received telemetry: ' + JSON.stringify({ ...data }, undefined, 2),
       );
 
-      if (data.setpoint != undefined) {
-        setSetpointReadings((prev) => {
-          return [
-            ...prev,
-            {
-              timestamp: ts,
-              setpoint: data.setpoint,
-            },
-          ];
-        });
-      }
-
-      if (data.temperature != undefined) {
-        setTemperatureReadings((prev) => {
-          return [
-            ...prev,
-            {
-              timestamp: ts,
-              temperature: data.temperature,
-            },
-          ];
-        });
-      }
+      setTelemetryData((prev) => {
+        return [
+          ...prev,
+          {
+            timestamp: new Date(data.timestamp),
+            temperature: data.temperature,
+            setpoint: data.setpoint,
+          },
+        ];
+      });
     });
 
     return () => {
@@ -100,8 +76,7 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
     <GaggiaDataContext.Provider
       value={{
         socketConnected,
-        temperatureReadings,
-        setpointReadings,
+        telemetryData: telemetryData,
       }}
     >
       {children}
