@@ -72,6 +72,7 @@ class GaggiaController():
         self.__brew_setpoint = DEFAULT_BREW_SETPOINT
         self.__shot_time_limit = -1
         self.__brewStarted = 0
+        self.__brewStopped = 0
         self.__lastBrewSwitchState = False
         with shelve.open("config", ) as cfg:
             try:
