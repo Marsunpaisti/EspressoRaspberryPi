@@ -68,26 +68,26 @@ class GaggiaController():
 
         self.consecutiveReadTempFails = 0
         self.latestValidTemp = None
-        self.__steam_setpoint = DEFAULT_STEAM_SETPOINT
-        self.__brew_setpoint = DEFAULT_BREW_SETPOINT
-        self.__shot_time_limit = -1
+        self.steam_setpoint = DEFAULT_STEAM_SETPOINT
+        self.brew_setpoint = DEFAULT_BREW_SETPOINT
+        self.shot_time_limit = -1
         self.__brewStarted = 0
         self.__brewStopped = 0
         self.__lastBrewSwitchState = False
         with shelve.open("config", ) as cfg:
             try:
-                self.__steam_setpoint = cfg["steam_setpoint"]
-                self.__brew_setpoint = cfg["brew_setpoint"]
-                self.__shot_time_limit = cfg["shot_time_limit"]
+                self.steam_setpoint = cfg["steam_setpoint"]
+                self.brew_setpoint = cfg["brew_setpoint"]
+                self.shot_time_limit = cfg["shot_time_limit"]
             except KeyError:
                 pass
 
-        if (self.__shot_time_limit == None):
-            self.__shot_time_limit = -1
-        if (self.__brew_setpoint == None):
-            self.__brew_setpoint = DEFAULT_BREW_SETPOINT
-        if (self.__steam_setpoint == None):
-            self.__steam_setpoint = DEFAULT_STEAM_SETPOINT
+        if (self.shot_time_limit == None):
+            self.shot_time_limit = -1
+        if (self.brew_setpoint == None):
+            self.brew_setpoint = DEFAULT_BREW_SETPOINT
+        if (self.steam_setpoint == None):
+            self.steam_setpoint = DEFAULT_STEAM_SETPOINT
 
         self.pidController = simulinkpid.DiscretePid(
             P_GAIN, I_GAIN, D_GAIN, FILTER_COEFF_N, OUTPUT_UPPER_LIMIT, OUTPUT_LOWER_LIMIT)
@@ -115,11 +115,11 @@ class GaggiaController():
 
     def __limitShotDuration(self):
         steamingSwitchState = not steamSwitchPin.value
-        isShotTimerEnabled = self.__shot_time_limit != None and self.__shot_time_limit > 0
+        isShotTimerEnabled = self.shot_time_limit != None and self.shot_time_limit > 0
         if (isShotTimerEnabled and not steamingSwitchState):
             brewDurationSeconds = (time.time() -
                                    self.__brewStarted) / 1000
-            if (brewDurationSeconds > self.__shot_time_limit):
+            if (brewDurationSeconds > self.shot_time_limit):
                 self.__setPumpEnabled(False)
                 return True
         return False
@@ -180,9 +180,9 @@ class GaggiaController():
         steamingSwitch = not steamSwitchPin.value
 
         # Setpoint control
-        setpoint = self.__brew_setpoint
+        setpoint = self.brew_setpoint
         if (steamingSwitch):
-            setpoint = self.__steam_setpoint
+            setpoint = self.steam_setpoint
 
         if (setpoint == None):
             # Forcing type to be inferred as not None
@@ -276,7 +276,7 @@ class GaggiaController():
 
     def setBrewSetpoint(self, setpoint: float):
         if (type(setpoint) == int or type(setpoint) == float and setpoint >= 70 and setpoint <= 100):
-            self.__brew_setpoint = setpoint
+            self.brew_setpoint = setpoint
             with shelve.open("config", ) as cfg:
                 cfg["brew_setpoint"] = setpoint
 
@@ -286,7 +286,7 @@ class GaggiaController():
 
     def setSteamSetpoint(self, setpoint: float):
         if (type(setpoint) == int or type(setpoint) == float and setpoint >= 110 and setpoint <= 165):
-            self.__steam_setpoint = setpoint
+            self.steam_setpoint = setpoint
             with shelve.open("config", ) as cfg:
                 cfg["steam_setpoint"] = setpoint
             print(f"Steam setpoint set to {setpoint:.1f}")
@@ -295,7 +295,7 @@ class GaggiaController():
 
     def setShotTimeLimit(self, limitSeconds: float):
         if (type(limitSeconds) == int or type(limitSeconds) == float and limitSeconds >= -1 and limitSeconds <= 50):
-            self.__shot_time_limit = limitSeconds
+            self.shot_time_limit = limitSeconds
             with shelve.open("config", ) as cfg:
                 cfg["shot_time_limit"] = limitSeconds
             print(f"Shot time limit set to {limitSeconds:.1f}")

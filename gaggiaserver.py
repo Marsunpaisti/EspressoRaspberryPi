@@ -68,9 +68,9 @@ app.static_files = {
 
 def emitConfig():
     configData = {}
-    configData["shotTimeLimit"] = gaggiaController.__shot_time_limit
-    configData["brewSetpoint"] = gaggiaController.__brew_setpoint
-    configData["steamSetpoint"] = gaggiaController.__steam_setpoint
+    configData["shotTimeLimit"] = gaggiaController.shot_time_limit
+    configData["brewSetpoint"] = gaggiaController.brew_setpoint
+    configData["steamSetpoint"] = gaggiaController.steam_setpoint
     sio.emit("config", configData)
     pass
 
