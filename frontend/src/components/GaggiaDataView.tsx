@@ -149,7 +149,7 @@ export const GaggiaDataView = () => {
     temperatureReadings[temperatureReadings.length - 1] ?? -1;
 
   return (
-    <div className="w-full flex flex-1 flex-col min-w-[500px] max-w-[1000px] m-auto">
+    <div className="w-full flex flex-1 flex-col max-w-[1000px] m-auto">
       <TemperatureChart
         telemetryData={temperatureReadings}
         timeHorizonSeconds={60}
