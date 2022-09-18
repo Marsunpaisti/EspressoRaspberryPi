@@ -39,6 +39,7 @@ telemetryHistory = collections.deque(maxlen=MAX_RETAINED_TELEMETRY_HISTORY)
 
 
 def sendAndStoreTelemetry(telemetryData: dict):
+    return
     global telemetryHistory
     telemetryHistory.append(telemetryData)
     debugPrint(f"Sending {str(telemetryData)}")
@@ -86,12 +87,6 @@ def set_shot_time_limit_handler(sid, data):
     return gaggiaController.setShotTimeLimit(data)
 
 
-@sio.on("test_print")
-def test_print_handler(sid, data):
-    print(f"tp {data}")
-    return "ack"
-
-
 def startListening():
     wsgi.server(listen(("", 80)), app)
 
@@ -118,5 +113,5 @@ if __name__ == "__main__":
     # testSignalsThread = threading.Thread(target=mockTelemetrySender, args=())
     # testSignalsThread.start()
     # testSignalsThread.join()
-    # gaggiaController.start()
-    # gaggiaController.controlLoopThread.join()
+    gaggiaController.start()
+    gaggiaController.controlLoopThread.join()
