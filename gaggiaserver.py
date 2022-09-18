@@ -97,7 +97,7 @@ def startListening():
 
 def mockTelemetrySender():
     sio.sleep(3)
-    for i in range(1, 2000):
+    for i in range(1, 30):
         telemetryData = {}
         telemetryData["ts"] = round(time()*1000)
         telemetryData["temp"] = math.sin(
@@ -110,8 +110,10 @@ def mockTelemetrySender():
 
 if __name__ == "__main__":
     # gaggiaController.start()
+    serverThread = threading.Thread(
+        target=startListening, args=(), daemon=True)
     testSignalsThread = threading.Thread(target=mockTelemetrySender, args=())
     testSignalsThread.start()
-    startListening()
+    serverThread.start()
     testSignalsThread.join()
     # gaggiaController.controlLoopThread.join()
