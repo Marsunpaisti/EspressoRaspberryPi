@@ -9,6 +9,7 @@ import {
   useEffect,
 } from 'react';
 import { GaggiaDataContext } from '../contexts/GaggiaDataContext';
+import { GaggiaConfigView } from './GaggiaConfigView';
 
 export const SpinnerView = ({ text }: { text: string }) => {
   return (
@@ -104,7 +105,7 @@ export const MainRouter = () => {
                 path="/config"
                 element={
                   <FadeIn key="/config">
-                    <div>Config</div>
+                    <GaggiaConfigView />
                   </FadeIn>
                 }
               />

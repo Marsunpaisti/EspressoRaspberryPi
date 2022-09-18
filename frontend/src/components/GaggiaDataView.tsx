@@ -131,7 +131,7 @@ const TemperatureChart = ({
   );
 };
 
-const DataReadingCard: React.FC<PropsWithChildren> = ({ children }) => {
+export const DataCard: React.FC<PropsWithChildren> = ({ children }) => {
   return (
     <div className="flex flex-row rounded overflow-hidden shadow-paper w-full bg-stone-400 p-1">
       {children}
@@ -155,7 +155,7 @@ export const GaggiaDataView = () => {
         timeHorizonSeconds={60}
       />
       <div className="flex flex-row overflow-hidden gap-2 mt-2 w-full">
-        <DataReadingCard>
+        <DataCard>
           <p className="text-center text-xl flex flex-[1] justify-center items-center">
             <span
               className="material-symbols-outlined text-[35px] mr-[-5px] font-extralight"
@@ -173,8 +173,8 @@ export const GaggiaDataView = () => {
               },
             )} °C`}
           </p>
-        </DataReadingCard>
-        <DataReadingCard>
+        </DataCard>
+        <DataCard>
           <p className="text-center text-xl flex flex-1 justify-center items-center">
             <span
               className="material-symbols-outlined text-[35px] mr-[-5px] font-extralight"
@@ -192,10 +192,10 @@ export const GaggiaDataView = () => {
               },
             )} °C`}
           </p>{' '}
-        </DataReadingCard>
+        </DataCard>
       </div>
       <div className="flex flex-row overflow-hidden gap-2 mt-2 w-full">
-        <DataReadingCard>
+        <DataCard>
           <p className="text-center text-xl flex flex-1 justify-center items-center">
             <span className="material-symbols-outlined text-[30px]">
               coffee
@@ -207,7 +207,7 @@ export const GaggiaDataView = () => {
               maximumFractionDigits: 1,
             })} s`}
           </p>
-        </DataReadingCard>
+        </DataCard>
       </div>
     </div>
   );
