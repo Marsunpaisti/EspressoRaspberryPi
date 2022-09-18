@@ -197,7 +197,6 @@ class GaggiaController():
         telemetryData["temp"] = temperature
         telemetryData["out"] = dutyCycle
         telemetryData["set"] = setpoint
-        debugPrint(str(telemetryData))
         if (self.onTelemetryCallback == None):
             return
         self.onTelemetryCallback(telemetryData)

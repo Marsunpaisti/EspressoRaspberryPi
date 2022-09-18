@@ -41,6 +41,7 @@ telemetryHistory = collections.deque(maxlen=MAX_RETAINED_TELEMETRY_HISTORY)
 def sendAndStoreTelemetry(telemetryData: dict):
     global telemetryHistory
     telemetryHistory.append(telemetryData)
+    debugPrint(f"Sending {str(telemetryData)}")
     sio.emit("telemetry", telemetryData)
 
 
