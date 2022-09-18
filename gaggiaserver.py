@@ -97,7 +97,7 @@ def startListening():
 
 def mockTelemetrySender():
     sio.sleep(3)
-    for i in range(1, 30):
+    for i in range(1, 2000):
         telemetryData = {}
         telemetryData["ts"] = round(time()*1000)
         telemetryData["temp"] = math.sin(

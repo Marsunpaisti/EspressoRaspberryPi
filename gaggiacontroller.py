@@ -11,6 +11,7 @@ import socket
 import simulinkpid
 import shelve
 import eventlet
+import atexit
 
 eventlet.monkey_patch()
 
@@ -24,16 +25,22 @@ OUTPUT_LOWER_LIMIT = 0.0
 DEFAULT_STEAM_SETPOINT = 150.0
 DEFAULT_BREW_SETPOINT = 94.0
 
+STEAM_PIN = board.D23
+BREW_PIN = board.D12
+PUMP_PIN = board.D26
+SPI_CS_PIN = board.D8
+HEATER_PIN = board.D4
+
 spi = board.SPI()
-cs = digitalio.DigitalInOut(board.D8)
+cs = digitalio.DigitalInOut(SPI_CS_PIN)
 max31855 = adafruit_max31855.MAX31855(spi, cs)
-steamSwitchPin = digitalio.DigitalInOut(board.D23)
+steamSwitchPin = digitalio.DigitalInOut(STEAM_PIN)
 steamSwitchPin.switch_to_input(pull=digitalio.Pull.UP)
-brewSwitchPin = digitalio.DigitalInOut(board.D12)
+brewSwitchPin = digitalio.DigitalInOut(BREW_PIN)
 brewSwitchPin.switch_to_input(pull=digitalio.Pull.UP)
-pumpPin = digitalio.DigitalInOut(board.D26)
+pumpPin = digitalio.DigitalInOut(PUMP_PIN)
 pumpPin.switch_to_output(False)
-heaterPin = pwmio.PWMOut(board.D4, frequency=2,
+heaterPin = pwmio.PWMOut(HEATER_PIN, frequency=2,
                          duty_cycle=0, variable_frequency=False)
 DISABLE_PRINTS = False
 
@@ -46,6 +53,7 @@ def debugPrint(text: str):
 
 class GaggiaController():
     def __init__(self, telemetryAddress, onTelemetryCallback, disablePrints):
+        atexit.register(self.__disableOutputsAndExit)
         global DISABLE_PRINTS
         self.disablePrints = disablePrints
         DISABLE_PRINTS = disablePrints
@@ -112,6 +120,17 @@ class GaggiaController():
         self.__setPumpEnabled(False)
         heaterPin.deinit()
         pumpPin.deinit()
+
+        digitalio.DigitalInOut(HEATER_PIN).switch_to_input(
+            pull=digitalio.Pull.DOWN)
+        digitalio.DigitalInOut(BREW_PIN).switch_to_input(
+            pull=digitalio.Pull.DOWN)
+        digitalio.DigitalInOut(STEAM_PIN).switch_to_input(
+            pull=digitalio.Pull.DOWN)
+        digitalio.DigitalInOut(PUMP_PIN).switch_to_input(
+            pull=digitalio.Pull.DOWN)
+        digitalio.DigitalInOut(SPI_CS_PIN).switch_to_input(
+            pull=digitalio.Pull.DOWN)
         os._exit(1)
 
     def __controlLoopLogic(self):
