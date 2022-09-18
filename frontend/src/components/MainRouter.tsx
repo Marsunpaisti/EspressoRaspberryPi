@@ -46,10 +46,10 @@ export const FadeIn: React.FC<PropsWithChildren> = ({ children }) => {
     <Transition
       show={true}
       appear={true}
-      enter="transition-all duration-200"
+      enter="transition-all duration-500"
       enterFrom="opacity-0"
       enterTo="opacity-100"
-      leave="transition-all duration-200"
+      leave="transition-all duration-500"
       leaveFrom="opacity-100"
       leaveTo="opacity-0"
       className="flex flex-1 flex-col w-full h-full"

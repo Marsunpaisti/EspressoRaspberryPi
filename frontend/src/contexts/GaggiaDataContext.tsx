@@ -117,7 +117,7 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
       socket.off('disconnect');
       socket.off('telemetry');
     };
-  }, []);
+  }, [registerNewTelemetry, registerTelemetryHistory]);
 
   return (
     <GaggiaDataContext.Provider
