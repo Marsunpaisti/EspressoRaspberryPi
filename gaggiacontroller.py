@@ -191,13 +191,15 @@ class GaggiaController():
         return
 
     def __handleTelemetryCallback(self, temperature: float, dutyCycle: float, setpoint: float):
-        if (self.onTelemetryCallback == None):
-            return
+
         telemetryData = {}
         telemetryData["ts"] = round(time.time()*1000)
         telemetryData["temp"] = temperature
         telemetryData["out"] = dutyCycle
         telemetryData["set"] = setpoint
+        debugPrint(str(telemetryData))
+        if (self.onTelemetryCallback == None):
+            return
         self.onTelemetryCallback(telemetryData)
 
     def __sendUdpTelemetry(self, temperature: float, steamingSwitchState: int, brewSwitchState: int, msgIndex: int, output: float):
