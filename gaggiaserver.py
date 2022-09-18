@@ -92,7 +92,10 @@ def test_print_handler(sid, data):
 
 
 def startListening():
-    wsgi.server(listen(("", 80)), app)
+    try:
+        wsgi.server(listen(("", 80)), app)
+    except:
+        print("Woop")
 
 
 def mockTelemetrySender():
