@@ -93,6 +93,7 @@ class GaggiaController():
         self.controlLoopThread = threading.Thread(
             target=self.__controlLoop, args=())
         self.controlLoopThread.start()
+        debugPrint("Gaggia Controller Started")
 
     def stop(self):
         self.isRunning = False
@@ -137,6 +138,8 @@ class GaggiaController():
         timeSinceLastSample = time.time() - self.lastSampleTimestamp
         if (timeSinceLastSample < SAMPLING_INTERVAL):
             return
+
+        debugPrint("Control loop logic")
 
         self.lastSampleTimestamp = time.time()
         self.sampleNumber += 1
