@@ -111,12 +111,14 @@ def mockTelemetrySender():
 
 
 if __name__ == "__main__":
-    serverThread = threading.Thread(
-        target=startListening, args=(), daemon=True)
-    serverThread.start()
+    # serverThread = threading.Thread(
+    #    target=startListening, args=(), daemon=True)
+    # serverThread.start()
 
-    testSignalsThread = threading.Thread(target=mockTelemetrySender, args=())
+    testSignalsThread = threading.Thread(
+        target=mockTelemetrySender, args=(), daemon=True)
     testSignalsThread.start()
-    testSignalsThread.join()
+
+    startListening()
     # gaggiaController.start()
     # gaggiaController.controlLoopThread.join()
