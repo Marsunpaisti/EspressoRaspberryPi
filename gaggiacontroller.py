@@ -11,6 +11,9 @@ import socket
 import simulinkpid
 import shelve
 import atexit
+import eventlet
+
+eventlet.monkey_patch()
 
 SAMPLING_INTERVAL = 0.5
 P_GAIN = 0.046
@@ -109,7 +112,7 @@ class GaggiaController():
                 self.__disableOutputsAndExit()
 
             try:
-                self.sio.sleep(0.01)
+                self.sio.sleep(0.05)
             except KeyboardInterrupt:
                 self.__disableOutputsAndExit()
 
