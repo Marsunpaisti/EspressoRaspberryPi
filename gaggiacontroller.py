@@ -165,8 +165,7 @@ class GaggiaController():
         self.__sendUdpTelemetry(
             boilerTemperature, steamingSwitch, brewSwitch, self.sampleNumber, output)
 
-        if (self.sampleNumber % 4 == 0):
-            self.__handleTelemetryCallback(boilerTemperature, output, setpoint)
+        self.__handleTelemetryCallback(boilerTemperature, output, setpoint)
         return
 
     def __handleTelemetryCallback(self, temperature: float, dutyCycle: float, setpoint: float):
