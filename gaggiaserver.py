@@ -114,7 +114,6 @@ if __name__ == "__main__":
     serverThread = threading.Thread(
         target=startListening, args=(), daemon=True)
     serverThread.start()
-    serverThread.join()
 
     # testSignalsThread = threading.Thread(target=mockTelemetrySender, args=())
     # testSignalsThread.start()
