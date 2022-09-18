@@ -111,20 +111,13 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
     socket.on('connect', () => setSocketConnected(true));
     socket.on('disconnect', () => setSocketConnected(false));
     socket.on('telemetry', (msg: ITelemetryMessage) => {
-      console.log(
-        'Received telemetry: ' + JSON.stringify({ ...msg }, undefined, 2),
-      );
       registerNewTelemetry(msg);
     });
 
     socket.on('telemetryHistory', (msgs: ITelemetryMessage[]) => {
-      console.log('Received telemetry history with length: ' + msgs.length);
       registerTelemetryHistory(msgs);
     });
     socket.on('config', (msg: IGaggiaConfig) => {
-      console.log(
-        'Received config: ' + JSON.stringify({ ...msg }, undefined, 2),
-      );
       setGaggiaConfig(msg);
     });
 
