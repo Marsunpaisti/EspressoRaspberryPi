@@ -92,10 +92,7 @@ def test_print_handler(sid, data):
 
 
 def startListening():
-    try:
-        wsgi.server(listen(("", 80)), app)
-    except:
-        print("Woop")
+    wsgi.server(listen(("", 80)), app)
 
 
 def mockTelemetrySender():
@@ -118,5 +115,9 @@ if __name__ == "__main__":
     testSignalsThread = threading.Thread(target=mockTelemetrySender, args=())
     testSignalsThread.start()
     serverThread.start()
-    testSignalsThread.join()
+
+    try:
+        testSignalsThread.join()
+    except:
+        print("Woop")
     # gaggiaController.controlLoopThread.join()
