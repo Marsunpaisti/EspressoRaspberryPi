@@ -37,12 +37,18 @@ app = socketio.WSGIApp(sio)
 
 telemetryHistory = collections.deque(maxlen=MAX_RETAINED_TELEMETRY_HISTORY)
 
+telemetryCount = 1
+
 
 def sendAndStoreTelemetry(telemetryData: dict):
-    return
     global telemetryHistory
+    global telemetryCount
+    telemetryCount = telemetryCount + 1
+    if (telemetryCount % 2 == 0):  # Skip every other telemetry for a 1 sec send interval
+        return
+
     telemetryHistory.append(telemetryData)
-    debugPrint(f"Sending {str(telemetryData)}")
+    #debugPrint(f"Sending {str(telemetryData)}")
     sio.emit("telemetry", telemetryData)
 
 
