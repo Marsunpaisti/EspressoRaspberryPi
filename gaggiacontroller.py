@@ -112,7 +112,7 @@ class GaggiaController():
                 self.__disableOutputsAndExit()
 
             try:
-                self.sio.sleep(0.250)
+                self.sio.sleep(0.5)
             except KeyboardInterrupt:
                 self.__disableOutputsAndExit()
 

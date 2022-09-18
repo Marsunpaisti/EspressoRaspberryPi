@@ -17,6 +17,7 @@ const host =
 
 const socket = io(host, {
   transports: ['websocket'],
+  reconnectionDelayMax: 3000,
 });
 
 console.log('SocketIO Host: ' + host);
