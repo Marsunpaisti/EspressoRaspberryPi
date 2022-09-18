@@ -27,20 +27,27 @@ export interface ITelemetryData {
   timestamp: Date;
   temperature: number;
   setpoint: number;
-  dutyCycle: number;
+  shotDuration: number;
 }
 
 export interface ITelemetryMessage {
   ts: number;
   temp: number;
-  out: number;
   set: number;
+  shotdur: number;
+}
+
+export interface IGaggiaConfig {
+  shotTimeLimit: number;
+  steamSetpoint: number;
+  brewSetpoint: number;
 }
 
 export interface IGaggiaDataContext {
   telemetryData: ITelemetryData[];
   brewTimer?: number;
   socketConnected: boolean;
+  gaggiaConfig: IGaggiaConfig;
 }
 
 export const GaggiaDataContext = React.createContext<IGaggiaDataContext>(
@@ -52,7 +59,7 @@ const convertTelemetryMsgToData = (msg: ITelemetryMessage): ITelemetryData => {
     timestamp: new Date(msg.ts),
     temperature: msg.temp,
     setpoint: msg.set,
-    dutyCycle: msg.out,
+    shotDuration: msg.shotdur,
   };
 };
 
@@ -61,6 +68,11 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
 }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [telemetryData, setTelemetryData] = useState<ITelemetryData[]>([]);
+  const [gaggiaConfig, setGaggiaConfig] = useState<IGaggiaConfig>({
+    brewSetpoint: -1,
+    steamSetpoint: -1,
+    shotTimeLimit: -1,
+  });
   const MAX_STORED_DATAPOINTS = 180;
 
   const registerNewTelemetry = useCallback(
@@ -109,6 +121,12 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
       console.log('Received telemetry history with length: ' + msgs.length);
       registerTelemetryHistory(msgs);
     });
+    socket.on('config', (msg: IGaggiaConfig) => {
+      console.log(
+        'Received config: ' + JSON.stringify({ ...msg }, undefined, 2),
+      );
+      setGaggiaConfig(msg);
+    });
 
     if (socket.connected) {
       setSocketConnected(true);
@@ -116,6 +134,8 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
     return () => {
       socket.off('connect');
       socket.off('disconnect');
+      socket.off('telemetryHistory');
+      socket.off('config');
       socket.off('telemetry');
     };
   }, [registerNewTelemetry, registerTelemetryHistory]);
@@ -124,7 +144,8 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
     <GaggiaDataContext.Provider
       value={{
         socketConnected,
-        telemetryData: telemetryData,
+        telemetryData,
+        gaggiaConfig,
       }}
     >
       {children}

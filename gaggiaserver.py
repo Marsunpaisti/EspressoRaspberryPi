@@ -52,7 +52,7 @@ def sendAndStoreTelemetry(telemetryData: dict):
     sio.emit("telemetry", telemetryData)
 
 
-def sendInitialDataOnConnect():
+def emitInitialDataOnConnect():
     global telemetryHistory
     sio.emit("telemetryHistory", list(telemetryHistory))
 
@@ -66,6 +66,15 @@ app.static_files = {
 }
 
 
+def emitConfig():
+    configData = {}
+    configData["shotTimeLimit"] = gaggiaController.__shot_time_limit
+    configData["brewSetpoint"] = gaggiaController.__brew_setpoint
+    configData["steamSetpoint"] = gaggiaController.__steam_setpoint
+    sio.emit("config", configData)
+    pass
+
+
 def debugPrint(text: str):
     if (DISABLE_PRINTS):
         return
@@ -75,22 +84,26 @@ def debugPrint(text: str):
 @sio.event
 def connect(sid, environ):
     debugPrint(f"New connection: {sid}")
-    sendInitialDataOnConnect()
+    emitConfig()
+    emitInitialDataOnConnect()
 
 
 @sio.on("set_brew_setpoint")
 def set_brew_setpoint_handler(sid, data):
-    return gaggiaController.setBrewSetpoint(data)
+    gaggiaController.setBrewSetpoint(data)
+    emitConfig()
 
 
 @sio.on("set_steam_setpoint")
 def set_steam_setpoint_handler(sid, data):
-    return gaggiaController.setSteamSetpoint(data)
+    gaggiaController.setSteamSetpoint(data)
+    emitConfig()
 
 
 @sio.on("set_shot_time_limit")
 def set_shot_time_limit_handler(sid, data):
-    return gaggiaController.setShotTimeLimit(data)
+    gaggiaController.setShotTimeLimit(data)
+    emitConfig()
 
 
 def startListening():
@@ -104,8 +117,8 @@ def mockTelemetrySender():
         telemetryData["ts"] = round(time()*1000)
         telemetryData["temp"] = math.sin(
             time() * (2*math.pi / 120)) * 40 + 60
-        telemetryData["out"] = 0
         telemetryData["set"] = 93
+        telemetryData["shotdur"] = 0
         sendAndStoreTelemetry(telemetryData)
         sio.sleep(1)
 

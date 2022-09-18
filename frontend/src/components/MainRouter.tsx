@@ -9,7 +9,6 @@ import {
   useEffect,
 } from 'react';
 import { GaggiaDataContext } from '../contexts/GaggiaDataContext';
-import { Transition } from '@headlessui/react';
 
 export const SpinnerView = ({ text }: { text: string }) => {
   return (

@@ -145,7 +145,7 @@ export const GaggiaDataView = () => {
   if (temperatureReadings.length < 2) {
     return <SpinnerView text="Waiting for data..." />;
   }
-  const latestTemperatureData =
+  const latestTelemetryData =
     temperatureReadings[temperatureReadings.length - 1] ?? -1;
 
   return (
@@ -165,7 +165,7 @@ export const GaggiaDataView = () => {
             >
               device_thermostat
             </span>
-            {`Temperature ${latestTemperatureData.temperature.toLocaleString(
+            {`Temperature ${latestTelemetryData.temperature.toLocaleString(
               undefined,
               {
                 minimumFractionDigits: 1,
@@ -184,7 +184,7 @@ export const GaggiaDataView = () => {
             >
               device_thermostat
             </span>
-            {`Setpoint ${latestTemperatureData.setpoint.toLocaleString(
+            {`Setpoint ${latestTelemetryData.setpoint.toLocaleString(
               undefined,
               {
                 minimumFractionDigits: 1,
@@ -200,7 +200,12 @@ export const GaggiaDataView = () => {
             <span className="material-symbols-outlined text-[30px]">
               coffee
             </span>
-            {`Shot duration N/A`}
+            {`Shot timer ${(
+              latestTelemetryData.shotDuration ?? 0
+            ).toLocaleString(undefined, {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            })} s`}
           </p>
         </DataReadingCard>
       </div>

@@ -68,9 +68,11 @@ class GaggiaController():
 
         self.consecutiveReadTempFails = 0
         self.latestValidTemp = None
-        self.__steam_setpoint = None
-        self.__brew_setpoint = None
-        self.__shot_time_limit = None
+        self.__steam_setpoint = DEFAULT_STEAM_SETPOINT
+        self.__brew_setpoint = DEFAULT_BREW_SETPOINT
+        self.__shot_time_limit = -1
+        self.__brewStarted = 0
+        self.__lastBrewSwitchState = False
         with shelve.open("config", ) as cfg:
             try:
                 self.__steam_setpoint = cfg["steam_setpoint"]
@@ -78,10 +80,6 @@ class GaggiaController():
                 self.__shot_time_limit = cfg["shot_time_limit"]
             except KeyError:
                 pass
-        if (self.__brew_setpoint == None):
-            self.__brew_setpoint = DEFAULT_BREW_SETPOINT
-        if (self.__steam_setpoint == None):
-            self.__steam_setpoint = DEFAULT_STEAM_SETPOINT
 
         self.pidController = simulinkpid.DiscretePid(
             P_GAIN, I_GAIN, D_GAIN, FILTER_COEFF_N, OUTPUT_UPPER_LIMIT, OUTPUT_LOWER_LIMIT)
@@ -99,12 +97,33 @@ class GaggiaController():
     def stop(self):
         self.isRunning = False
 
+    def __trackShotDuration(self):
+        brewSwitchState = not brewSwitchPin.value
+        if (brewSwitchState and not self.__lastBrewSwitchState):
+            self.__brewStarted = time.time()
+        if (not brewSwitchState and self.__lastBrewSwitchState):
+            self.__brewStopped = time.time()
+        self.__lastBrewSwitchState = brewSwitchState
+
+    def __limitShotDuration(self):
+        steamingSwitchState = not steamSwitchPin.value
+        isShotTimerEnabled = self.__shot_time_limit != None and self.__shot_time_limit > 0
+        if (isShotTimerEnabled and not steamingSwitchState):
+            brewDurationSeconds = (time.time() -
+                                   self.__brewStarted) / 1000
+            if (brewDurationSeconds > self.__shot_time_limit):
+                self.__setPumpEnabled(False)
+                return True
+        return False
+
     def __controlLoop(self):
         while self.isRunning:
             try:
                 # Always feeding brew switch state to pump
                 brewSwitch = not brewSwitchPin.value
-                self.__setPumpEnabled(brewSwitch)
+                self.__trackShotDuration()
+                if (not self.__limitShotDuration()):
+                    self.__setPumpEnabled(brewSwitch)
 
                 self.__controlLoopLogic()
             except Exception as e:
@@ -112,7 +131,7 @@ class GaggiaController():
                 self.__disableOutputsAndExit()
 
             try:
-                self.sio.sleep(0.5)
+                self.sio.sleep(0.1)
             except KeyboardInterrupt:
                 self.__disableOutputsAndExit()
 
@@ -188,16 +207,19 @@ class GaggiaController():
         self.__sendUdpTelemetry(
             boilerTemperature, steamingSwitch, brewSwitch, self.sampleNumber, output)
 
-        self.__handleTelemetryCallback(boilerTemperature, output, setpoint)
+        self.__handleTelemetryCallback(
+            boilerTemperature, setpoint)
         return
 
-    def __handleTelemetryCallback(self, temperature: float, dutyCycle: float, setpoint: float):
-
+    def __handleTelemetryCallback(self, temperature: float, setpoint: float):
+        shotDuration = self.__brewStopped - self.__brewStarted
+        if (self.__brewStopped < self.__brewStarted):
+            shotDuration = time.time() - self.__brewStarted
         telemetryData = {}
         telemetryData["ts"] = round(time.time()*1000)
-        telemetryData["temp"] = temperature
-        telemetryData["out"] = dutyCycle
-        telemetryData["set"] = setpoint
+        telemetryData["temp"] = round(temperature, 2)
+        telemetryData["set"] = round(setpoint, 1)
+        telemetryData["shotdur"] = round(shotDuration, 1)
         if (self.onTelemetryCallback == None):
             return
         self.onTelemetryCallback(telemetryData)
