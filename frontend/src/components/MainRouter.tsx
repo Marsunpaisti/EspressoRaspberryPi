@@ -1,7 +1,13 @@
 import { GaggiaDataView } from './GaggiaDataView';
 import { BrowserRouter, Link, Route, Routes, useMatch } from 'react-router-dom';
 import { Spinner } from './Spinner';
-import { PropsWithChildren, ReactNode, useContext } from 'react';
+import {
+  PropsWithChildren,
+  ReactNode,
+  useContext,
+  useState,
+  useEffect,
+} from 'react';
 import { GaggiaDataContext } from '../contexts/GaggiaDataContext';
 import { Transition } from '@headlessui/react';
 
@@ -42,20 +48,19 @@ const NavLink = ({
 };
 
 export const FadeIn: React.FC<PropsWithChildren> = ({ children }) => {
+  const [fadedIn, setFadedIn] = useState(false);
+
+  useEffect(() => {
+    setFadedIn(true);
+  }, [setFadedIn]);
   return (
-    <Transition
-      show={true}
-      appear={true}
-      enter="transition-all duration-500"
-      enterFrom="opacity-0"
-      enterTo="opacity-100"
-      leave="transition-all duration-500"
-      leaveFrom="opacity-100"
-      leaveTo="opacity-0"
-      className="flex flex-1 flex-col w-full h-full"
+    <div
+      className={`flex flex-1 flex-col w-full h-full transition-opacity duration-200 ${
+        fadedIn ? 'opacity-100' : 'opacity-0'
+      }`}
     >
       {children}
-    </Transition>
+    </div>
   );
 };
 

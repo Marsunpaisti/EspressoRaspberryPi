@@ -13,6 +13,7 @@ import { AxisLeft, AxisBottom } from '@visx/axis';
 import useMeasure from 'react-use-measure';
 import { LegendOrdinal, LegendItem, LegendLabel } from '@visx/legend';
 import colors from 'tailwindcss/colors';
+import { ResizeObserver } from '@juggle/resize-observer';
 
 export interface TelemetryDataWithDeltaTime extends ITelemetryData {
   deltaTime: number;
