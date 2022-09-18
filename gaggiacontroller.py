@@ -10,10 +10,7 @@ import adafruit_max31855
 import socket
 import simulinkpid
 import shelve
-import eventlet
 import atexit
-
-eventlet.monkey_patch()
 
 SAMPLING_INTERVAL = 0.5
 P_GAIN = 0.046
@@ -52,12 +49,13 @@ def debugPrint(text: str):
 
 
 class GaggiaController():
-    def __init__(self, telemetryAddress, onTelemetryCallback, disablePrints):
+    def __init__(self, sio, telemetryAddress, onTelemetryCallback, disablePrints):
         atexit.register(self.__disableOutputsAndExit)
         global DISABLE_PRINTS
         self.disablePrints = disablePrints
         DISABLE_PRINTS = disablePrints
         self.sock = None
+        self.sio = sio
         if (telemetryAddress != None):
             self.telemetryAddress = telemetryAddress
             self.sock = socket.socket(
@@ -111,7 +109,7 @@ class GaggiaController():
                 self.__disableOutputsAndExit()
 
             try:
-                time.sleep(0.01)
+                self.sio.sleep(0.01)
             except KeyboardInterrupt:
                 self.__disableOutputsAndExit()
 

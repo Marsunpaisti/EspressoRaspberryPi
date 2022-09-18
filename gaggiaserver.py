@@ -51,8 +51,8 @@ def sendInitialDataOnConnect():
     sio.emit("telemetryHistory", list(telemetryHistory))
 
 
-gaggiaController = GaggiaController(
-    telemetryAddress, sendAndStoreTelemetry, DISABLE_PRINTS)
+gaggiaController = GaggiaController(sio,
+                                    telemetryAddress, sendAndStoreTelemetry, DISABLE_PRINTS)
 
 app.static_files = {
     "/": "./frontendBuild/index.html",
