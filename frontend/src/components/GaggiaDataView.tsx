@@ -15,21 +15,30 @@ import useMeasure from 'react-use-measure';
 const getX = (d: ITelemetryData) => d.timestamp;
 const getY = (d: ITelemetryData) => d.temperature;
 const TemperatureChart = ({
-  temperatureReadings,
+  telemetryData,
   timeHorizonMs,
 }: {
-  temperatureReadings: ITelemetryData[];
+  telemetryData: ITelemetryData[];
   timeHorizonMs: number;
 }) => {
   const [ref, bounds] = useMeasure();
 
-  const latestTemperatureData =
-    temperatureReadings[temperatureReadings.length - 1] ?? -1;
-  const temperatureData = temperatureReadings.filter(
+  const latestTemperatureData = telemetryData[telemetryData.length - 1] ?? -1;
+  const temperatureData = telemetryData.filter(
     (data) =>
-      data.timestamp.getTime() >
-      latestTemperatureData.timestamp.getTime() - timeHorizonMs,
+      data.timestamp.getTime() >=
+      latestTemperatureData.timestamp.getTime() - timeHorizonMs - 500,
   );
+
+  const xAxisTickValues = [];
+  for (let i = timeHorizonMs; i >= 0; i = i - 5000) {
+    const offsetTickLocation = new Date(
+      latestTemperatureData.timestamp.getTime() - i,
+    );
+    if (offsetTickLocation >= telemetryData[0].timestamp) {
+      xAxisTickValues.push(offsetTickLocation);
+    }
+  }
 
   const margin = { top: 40, right: 30, bottom: 50, left: 40 };
   const { width, height } = bounds;
@@ -37,12 +46,8 @@ const TemperatureChart = ({
   const yMax = height - margin.top - margin.bottom;
 
   const timeDomain = extent(temperatureData, getX) as [Date, Date];
-  timeDomain[1] = new Date(
-    Math.max(
-      timeDomain[0].getTime() + timeHorizonMs - 1000,
-      timeDomain[1].getTime(),
-    ),
-  );
+  timeDomain[1] = new Date(timeDomain[0].getTime() + timeHorizonMs);
+
   const xScale = scaleTime<number>({
     domain: timeDomain,
     range: [0, xMax],
@@ -75,9 +80,23 @@ const TemperatureChart = ({
                 width={xMax}
                 height={yMax}
                 stroke="#cacaca"
+                tickValues={xAxisTickValues}
               />
-              <AxisBottom scale={xScale} top={yMax} />
               <AxisLeft scale={temperatureYScale} />
+              <AxisBottom
+                scale={xScale}
+                top={yMax}
+                tickValues={xAxisTickValues}
+                tickFormat={(d) => {
+                  const deltaTime =
+                    (d as Date).getTime() -
+                    latestTemperatureData.timestamp.getTime();
+                  return (deltaTime / 1000).toLocaleString(undefined, {
+                    maximumFractionDigits: 1,
+                    minimumFractionDigits: 1,
+                  });
+                }}
+              />
               <LinePath
                 data={temperatureData}
                 x={(d) => xScale(getX(d))}
@@ -106,7 +125,7 @@ export const GaggiaDataView = () => {
   return (
     <div className="w-full flex flex-1 flex-col items-center">
       <TemperatureChart
-        temperatureReadings={temperatureReadings}
+        telemetryData={temperatureReadings}
         timeHorizonMs={60000}
       />
       <p className="w-full text-center text-xl">{`Temperature ${latestTemperatureData.temperature.toLocaleString(

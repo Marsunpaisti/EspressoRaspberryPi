@@ -1,4 +1,9 @@
-import React, { PropsWithChildren, useEffect, useState } from 'react';
+import React, {
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import io from 'socket.io-client';
 
 const host =
@@ -21,11 +26,14 @@ export interface ITelemetryData {
   timestamp: Date;
   temperature: number;
   setpoint: number;
+  dutyCycle: number;
 }
 
-export interface ITelemetry {
-  timestamp: number;
-  temperature: number;
+export interface ITelemetryMessage {
+  ts: number;
+  temp: number;
+  out: number;
+  set: number;
 }
 
 export interface IGaggiaDataContext {
@@ -38,33 +46,72 @@ export const GaggiaDataContext = React.createContext<IGaggiaDataContext>(
   {} as IGaggiaDataContext,
 );
 
+const convertTelemetryMsgToData = (msg: ITelemetryMessage): ITelemetryData => {
+  return {
+    timestamp: new Date(msg.ts),
+    temperature: msg.temp,
+    setpoint: msg.set,
+    dutyCycle: msg.out,
+  };
+};
+
 export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
   children,
 }) => {
   const [socketConnected, setSocketConnected] = useState(false);
-
   const [telemetryData, setTelemetryData] = useState<ITelemetryData[]>([]);
+  const MAX_STORED_DATAPOINTS = 180;
+
+  const registerNewTelemetry = useCallback(
+    (msg: ITelemetryMessage) => {
+      setTelemetryData((prev) => {
+        if (!prev.find((p) => p.timestamp.getTime() === msg.ts)) {
+          const newData = [...prev, convertTelemetryMsgToData(msg)];
+          if (newData.length > MAX_STORED_DATAPOINTS)
+            return newData.slice(-MAX_STORED_DATAPOINTS);
+          return newData;
+        } else {
+          return prev;
+        }
+      });
+    },
+    [setTelemetryData],
+  );
+
+  const registerTelemetryHistory = useCallback(
+    (msgs: ITelemetryMessage[]) => {
+      setTelemetryData((prev) => {
+        const filtered = msgs.filter(
+          (d) => !prev.find((p) => p.timestamp.getTime() === d.ts),
+        );
+        const converted = filtered.map((d) => convertTelemetryMsgToData(d));
+        const newData = [...prev, ...converted];
+        if (newData.length > MAX_STORED_DATAPOINTS)
+          return newData.slice(-MAX_STORED_DATAPOINTS);
+        return newData;
+      });
+    },
+    [setTelemetryData],
+  );
 
   useEffect(() => {
     socket.on('connect', () => setSocketConnected(true));
     socket.on('disconnect', () => setSocketConnected(false));
-    socket.on('telemetry', (data: ITelemetryData) => {
+    socket.on('telemetry', (msg: ITelemetryMessage) => {
       console.log(
-        'Received telemetry: ' + JSON.stringify({ ...data }, undefined, 2),
+        'Received telemetry: ' + JSON.stringify({ ...msg }, undefined, 2),
       );
-
-      setTelemetryData((prev) => {
-        return [
-          ...prev,
-          {
-            timestamp: new Date(data.timestamp),
-            temperature: data.temperature,
-            setpoint: data.setpoint,
-          },
-        ];
-      });
+      registerNewTelemetry(msg);
     });
 
+    socket.on('telemetryHistory', (msgs: ITelemetryMessage[]) => {
+      console.log('Received telemetry history with length: ' + msgs.length);
+      registerTelemetryHistory(msgs);
+    });
+
+    if (socket.connected) {
+      setSocketConnected(true);
+    }
     return () => {
       socket.off('connect');
       socket.off('disconnect');

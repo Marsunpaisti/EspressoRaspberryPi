@@ -5,6 +5,7 @@ import socketio
 import argparse
 from eventlet import wsgi, listen, monkey_patch
 from gaggiacontroller import GaggiaController
+import collections
 
 monkey_patch()
 print(f"Monkeypatched: {threading.current_thread.__module__}")
@@ -23,7 +24,7 @@ config = vars(args)
 DATA_SEND_IP = config["ip"]
 DATA_SEND_PORT = config["port"]
 DISABLE_PRINTS = config["disableprints"]
-
+MAX_RETAINED_TELEMETRY_HISTORY = 30
 telemetryAddress = None
 if (DATA_SEND_IP != None):
     telemetryAddress = (DATA_SEND_IP, DATA_SEND_PORT)
@@ -32,7 +33,24 @@ if (DATA_SEND_IP != None):
 sio = socketio.Server(async_mode="eventlet", cors_allowed_origins="*")
 # wrap with a WSGI application
 app = socketio.WSGIApp(sio)
-gaggiaController = GaggiaController(telemetryAddress, sio, DISABLE_PRINTS)
+
+
+telemetryHistory = collections.deque(maxlen=MAX_RETAINED_TELEMETRY_HISTORY)
+
+
+def sendAndStoreTelemetry(telemetryData: dict):
+    global telemetryHistory
+    telemetryHistory.append(telemetryData)
+    sio.emit("telemetry", telemetryData)
+
+
+def sendInitialDataOnConnect():
+    global telemetryHistory
+    sio.emit("telemetryHistory", list(telemetryHistory))
+
+
+gaggiaController = GaggiaController(
+    telemetryAddress, sendAndStoreTelemetry, DISABLE_PRINTS)
 
 app.static_files = {
     "/": "./frontendBuild/index.html",
@@ -49,6 +67,7 @@ def debugPrint(text: str):
 @sio.event
 def connect(sid, environ):
     debugPrint(f"New connection: {sid}")
+    sendInitialDataOnConnect()
 
 
 @sio.on("set_brew_setpoint")
@@ -76,22 +95,22 @@ def startListening():
     wsgi.server(listen(("", 80)), app)
 
 
-def send_test_signals():
+def mockTelemetrySender():
     sio.sleep(3)
     for i in range(1, 2000):
         telemetryData = {}
-        telemetryData["timestamp"] = round(time()*1000)
-        telemetryData["temperature"] = math.sin(
+        telemetryData["ts"] = round(time()*1000)
+        telemetryData["temp"] = math.sin(
             time() * (2*math.pi / 120)) * 40 + 60
-        telemetryData["dutyCycle"] = 0
-        telemetryData["setpoint"] = 93
-        sio.emit("telemetry", telemetryData)
+        telemetryData["out"] = 0
+        telemetryData["set"] = 93
+        sendAndStoreTelemetry(telemetryData)
         sio.sleep(1)
 
 
 if __name__ == "__main__":
     # gaggiaController.start()
-    testSignalsThread = threading.Thread(target=send_test_signals, args=())
+    testSignalsThread = threading.Thread(target=mockTelemetrySender, args=())
     testSignalsThread.start()
     startListening()
     testSignalsThread.join()

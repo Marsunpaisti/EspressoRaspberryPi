@@ -45,7 +45,7 @@ def debugPrint(text: str):
 
 
 class GaggiaController():
-    def __init__(self, telemetryAddress, sio, disablePrints):
+    def __init__(self, telemetryAddress, onTelemetryCallback, disablePrints):
         global DISABLE_PRINTS
         self.disablePrints = disablePrints
         DISABLE_PRINTS = disablePrints
@@ -55,7 +55,7 @@ class GaggiaController():
             self.sock = socket.socket(
                 socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.sampleNumber = 0
-        self.sio = sio
+        self.onTelemetryCallback = onTelemetryCallback
 
         self.consecutiveReadTempFails = 0
         self.latestValidTemp = None
@@ -158,7 +158,7 @@ class GaggiaController():
         self.__setHeaterDutyCycle(output)
 
         # Safety limit
-        if (boilerTemperature > 165):
+        if (boilerTemperature > 175):
             self.__setHeaterDutyCycle(0)
 
         # Send measurements over UDP
@@ -166,17 +166,18 @@ class GaggiaController():
             boilerTemperature, steamingSwitch, brewSwitch, self.sampleNumber, output)
 
         if (self.sampleNumber % 4 == 0):
-            self.__sendSocketIoTelemetry(boilerTemperature, output, setpoint)
+            self.__handleTelemetryCallback(boilerTemperature, output, setpoint)
         return
 
-    def __sendSocketIoTelemetry(self, temperature: float, dutyCycle: float, setpoint: float):
-        if (self.sio == None):
+    def __handleTelemetryCallback(self, temperature: float, dutyCycle: float, setpoint: float):
+        if (self.onTelemetryCallback == None):
             return
         telemetryData = {}
-        telemetryData["temperature"] = temperature
-        telemetryData["dutyCycle"] = dutyCycle
-        telemetryData["setpoint"] = setpoint
-        self.sio.emit("telemetry", telemetryData)
+        telemetryData["ts"] = round(time.time()*1000)
+        telemetryData["temp"] = temperature
+        telemetryData["out"] = dutyCycle
+        telemetryData["set"] = setpoint
+        self.onTelemetryCallback(telemetryData)
 
     def __sendUdpTelemetry(self, temperature: float, steamingSwitchState: int, brewSwitchState: int, msgIndex: int, output: float):
         if (self.sock == None):
@@ -221,7 +222,7 @@ class GaggiaController():
         heaterPin.duty_cycle = round(dutyCycleFraction * 65535)
 
     def setBrewSetpoint(self, setpoint: float):
-        if (type(setpoint) == int or type(setpoint) == float and setpoint >= 70 and setpoint <= 99):
+        if (type(setpoint) == int or type(setpoint) == float and setpoint >= 70 and setpoint <= 100):
             self.__brew_setpoint = setpoint
             with shelve.open("config", ) as cfg:
                 cfg["brew_setpoint"] = setpoint
@@ -231,7 +232,7 @@ class GaggiaController():
         return False
 
     def setSteamSetpoint(self, setpoint: float):
-        if (type(setpoint) == int or type(setpoint) == float and setpoint >= 110 and setpoint <= 160):
+        if (type(setpoint) == int or type(setpoint) == float and setpoint >= 110 and setpoint <= 165):
             self.__steam_setpoint = setpoint
             with shelve.open("config", ) as cfg:
                 cfg["steam_setpoint"] = setpoint
