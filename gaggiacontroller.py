@@ -82,6 +82,13 @@ class GaggiaController():
             except KeyError:
                 pass
 
+        if (self.__shot_time_limit == None):
+            self.__shot_time_limit = -1
+        if (self.__brew_setpoint == None):
+            self.__brew_setpoint = DEFAULT_BREW_SETPOINT
+        if (self.__steam_setpoint == None):
+            self.__steam_setpoint = DEFAULT_STEAM_SETPOINT
+
         self.pidController = simulinkpid.DiscretePid(
             P_GAIN, I_GAIN, D_GAIN, FILTER_COEFF_N, OUTPUT_UPPER_LIMIT, OUTPUT_LOWER_LIMIT)
 
