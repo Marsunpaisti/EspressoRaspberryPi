@@ -117,7 +117,7 @@ class GaggiaController():
         steamingSwitchState = not steamSwitchPin.value
         isShotTimerEnabled = self.shot_time_limit != None and self.shot_time_limit > 0
         if (isShotTimerEnabled and not steamingSwitchState):
-            brewDurationSeconds = time.time() - self.__brewStarted
+            brewDurationSeconds = round(time.time() - self.__brewStarted, 1)
             if (brewDurationSeconds >= self.shot_time_limit):
                 self.__setPumpEnabled(False)
                 if (self.__brewStopped < self.__brewStarted):
@@ -196,7 +196,7 @@ class GaggiaController():
         # Brew switch feedforward compensator
         compensatorOutput = 0.0
         # Sanity check for cases where brew switch might be intentionally activated to reduce temperature
-        if (brewSwitch and not steamingSwitch and boilerTemperature < (setpoint + 6.0)):
+        if (pumpPin.value == True and not steamingSwitch and boilerTemperature < (setpoint + 6.0)):
             compensatorOutput = 0.14
 
         output = pidOutput + compensatorOutput
