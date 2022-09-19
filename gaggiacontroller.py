@@ -118,7 +118,9 @@ class GaggiaController():
         isShotTimerEnabled = self.shot_time_limit != None and self.shot_time_limit > 0
         if (isShotTimerEnabled and not steamingSwitchState):
             brewDurationSeconds = (time.time() -
-                                   self.__brewStarted) / 1000
+                                   self.__brewStarted) / 1000.0
+            debugPrint(f"BrewDur: {brewDurationSeconds}")
+            debugPrint(f"Limit: {self.shot_time_limit}")
             if (brewDurationSeconds >= self.shot_time_limit):
                 self.__setPumpEnabled(False)
                 return True
