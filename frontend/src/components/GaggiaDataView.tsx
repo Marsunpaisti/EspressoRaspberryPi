@@ -78,7 +78,7 @@ const TemperatureChart = ({
   });
 
   return (
-    <div className="rounded overflow-hidden shadow-paper max-h-[500px] flex flex-1 flex-col bg-stone-400">
+    <div className="rounded shadow-paper max-h-[500px] flex flex-1 flex-col bg-stone-400">
       <svg className="flex flex-col flex-1 w-full overflow-visible" ref={ref}>
         {bounds && (
           <>
@@ -133,7 +133,7 @@ const TemperatureChart = ({
 
 export const DataCard: React.FC<PropsWithChildren> = ({ children }) => {
   return (
-    <div className="flex flex-row rounded overflow-hidden shadow-paper w-full bg-stone-400 p-1">
+    <div className="flex flex-row rounded shadow-paper w-full bg-stone-400 p-1 border-b-2 border-b-stone-500">
       {children}
     </div>
   );
@@ -154,7 +154,7 @@ export const GaggiaDataView = () => {
         telemetryData={temperatureReadings}
         timeHorizonSeconds={60}
       />
-      <div className="flex flex-row overflow-hidden gap-2 mt-2 w-full">
+      <div className="flex flex-row gap-2 mt-2 w-full">
         <DataCard>
           <p className="text-center text-xl flex flex-[1] justify-center items-center">
             <span
@@ -194,7 +194,7 @@ export const GaggiaDataView = () => {
           </p>{' '}
         </DataCard>
       </div>
-      <div className="flex flex-row overflow-hidden gap-2 mt-2 w-full">
+      <div className="flex flex-row gap-2 mt-2 w-full">
         <DataCard>
           <p className="text-center text-xl flex flex-1 justify-center items-center">
             <span className="material-symbols-outlined text-[30px]">

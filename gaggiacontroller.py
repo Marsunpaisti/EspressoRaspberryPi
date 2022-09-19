@@ -70,7 +70,7 @@ class GaggiaController():
         self.latestValidTemp = None
         self.steam_setpoint = DEFAULT_STEAM_SETPOINT
         self.brew_setpoint = DEFAULT_BREW_SETPOINT
-        self.shot_time_limit = -1
+        self.shot_time_limit = 0
         self.__brewStarted = 0
         self.__brewStopped = 0
         self.__lastBrewSwitchState = False
@@ -83,7 +83,7 @@ class GaggiaController():
                 pass
 
         if (self.shot_time_limit == None):
-            self.shot_time_limit = -1
+            self.shot_time_limit = 0
         if (self.brew_setpoint == None):
             self.brew_setpoint = DEFAULT_BREW_SETPOINT
         if (self.steam_setpoint == None):
@@ -119,7 +119,7 @@ class GaggiaController():
         if (isShotTimerEnabled and not steamingSwitchState):
             brewDurationSeconds = (time.time() -
                                    self.__brewStarted) / 1000
-            if (brewDurationSeconds > self.shot_time_limit):
+            if (brewDurationSeconds >= self.shot_time_limit):
                 self.__setPumpEnabled(False)
                 return True
         return False
@@ -275,30 +275,30 @@ class GaggiaController():
         heaterPin.duty_cycle = round(dutyCycleFraction * 65535)
 
     def setBrewSetpoint(self, setpoint: float):
-        if (type(setpoint) == int or type(setpoint) == float and setpoint >= 70 and setpoint <= 100):
+        if (type(setpoint) == int or type(setpoint) == float and setpoint >= 80 and setpoint <= 110):
             self.brew_setpoint = setpoint
             with shelve.open("config", ) as cfg:
                 cfg["brew_setpoint"] = setpoint
 
-            print(f"Brew setpoint set to {setpoint:.1f}")
+            debugPrint(f"Brew setpoint set to {setpoint:.1f}")
             return True
         return False
 
     def setSteamSetpoint(self, setpoint: float):
-        if (type(setpoint) == int or type(setpoint) == float and setpoint >= 110 and setpoint <= 165):
+        if (type(setpoint) == int or type(setpoint) == float and setpoint >= 120 and setpoint <= 160):
             self.steam_setpoint = setpoint
             with shelve.open("config", ) as cfg:
                 cfg["steam_setpoint"] = setpoint
-            print(f"Steam setpoint set to {setpoint:.1f}")
+            debugPrint(f"Steam setpoint set to {setpoint:.1f}")
             return True
         return False
 
     def setShotTimeLimit(self, limitSeconds: float):
-        if (type(limitSeconds) == int or type(limitSeconds) == float and limitSeconds >= -1 and limitSeconds <= 50):
+        if (type(limitSeconds) == int or type(limitSeconds) == float and limitSeconds >= 0 and limitSeconds <= 45):
             self.shot_time_limit = limitSeconds
             with shelve.open("config", ) as cfg:
                 cfg["shot_time_limit"] = limitSeconds
-            print(f"Shot time limit set to {limitSeconds:.1f}")
+            debugPrint(f"Shot time limit set to {limitSeconds:.1f}")
             return True
         return False
 

@@ -5,6 +5,7 @@
 html,
 body,
 #root {
+  @apply bg-stone-600;
   font-family: 'Source Sans Pro', 'Roboto';
   color: #fdfdfd;
   display: flex;

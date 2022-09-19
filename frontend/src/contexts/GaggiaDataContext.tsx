@@ -20,9 +20,6 @@ const socket = io(host, {
   reconnectionDelayMax: 3000,
 });
 
-console.log('SocketIO Host: ' + host);
-console.log('NODE_ENV: ' + process.env.NODE_ENV);
-
 export interface ITelemetryData {
   timestamp: Date;
   temperature: number;
@@ -48,6 +45,9 @@ export interface IGaggiaDataContext {
   brewTimer?: number;
   socketConnected: boolean;
   gaggiaConfig: IGaggiaConfig;
+  setShotTimeLimit: (limit: number) => void;
+  setBrewSetpoint: (setpoint: number) => void;
+  setSteamSetpoint: (setpoint: number) => void;
 }
 
 export const GaggiaDataContext = React.createContext<IGaggiaDataContext>(
@@ -107,6 +107,18 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
     [setTelemetryData],
   );
 
+  const setSteamSetpoint = useCallback((setpoint: number) => {
+    socket.emit('set_steam_setpoint', setpoint);
+  }, []);
+
+  const setBrewSetpoint = useCallback((setpoint: number) => {
+    socket.emit('set_brew_setpoint', setpoint);
+  }, []);
+
+  const setShotTimeLimit = useCallback((limit: number) => {
+    socket.emit('set_shot_time_limit', limit);
+  }, []);
+
   useEffect(() => {
     socket.on('connect', () => setSocketConnected(true));
     socket.on('disconnect', () => setSocketConnected(false));
@@ -139,6 +151,9 @@ export const GaggiaDataContextProvider: React.FC<PropsWithChildren> = ({
         socketConnected,
         telemetryData,
         gaggiaConfig,
+        setShotTimeLimit,
+        setBrewSetpoint,
+        setSteamSetpoint,
       }}
     >
       {children}

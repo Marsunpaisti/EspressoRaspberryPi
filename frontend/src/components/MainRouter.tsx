@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { GaggiaDataContext } from '../contexts/GaggiaDataContext';
 import { GaggiaConfigView } from './GaggiaConfigView';
+import coffeeIcon from '../assets/coffee.png';
 
 export const SpinnerView = ({ text }: { text: string }) => {
   return (
@@ -69,10 +70,14 @@ export const MainRouter = () => {
 
   return (
     <BrowserRouter>
-      <div className="flex flex-1 flex-col w-full h-full bg-stone-600">
-        <div className="bg-stone-800 w-full py-2 px-2 text-cente shadow-paper flex flex-row">
+      <div className="flex flex-1 flex-col w-full h-full">
+        <div className="bg-stone-800 w-full py-1 px-2 text-cente shadow-paper flex flex-row border-b-2 border-b-stone-800">
           <h1 className="text-xl font-bold flex flex-row items-center justify-start">
-            EspressoPI Control Panel
+            <img
+              src={coffeeIcon}
+              className="max-h-[36px] mr-1 w-auto object-contain"
+            />
+            EspressoPI Controller
           </h1>
           <div
             className="flex flex-row flex-1 justify-end"
