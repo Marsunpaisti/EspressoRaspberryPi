@@ -109,7 +109,7 @@ class GaggiaController():
         brewSwitchState = not brewSwitchPin.value
         if (brewSwitchState and not self.__lastBrewSwitchState):
             self.__brewStarted = time.time()
-        if (not brewSwitchState and self.__lastBrewSwitchState):
+        if (not brewSwitchState and self.__lastBrewSwitchState and self.__brewStopped < self.__brewStarted):
             self.__brewStopped = time.time()
         self.__lastBrewSwitchState = brewSwitchState
 
@@ -120,6 +120,8 @@ class GaggiaController():
             brewDurationSeconds = time.time() - self.__brewStarted
             if (brewDurationSeconds >= self.shot_time_limit):
                 self.__setPumpEnabled(False)
+                if (self.__brewStopped < self.__brewStarted):
+                    self.__brewStopped = time.time()
                 return True
         return False
 
