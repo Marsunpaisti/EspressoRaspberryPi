@@ -8,12 +8,14 @@ const EditableValue = ({
   max,
   initialValue,
   setValue,
+  formatValue,
 }: {
   title: ReactNode;
   min: number;
   max: number;
   initialValue: number;
   setValue: (newValue: number) => void;
+  formatValue: (value: number) => ReactNode;
 }) => {
   const [internalValue, setInternalValue] = useState(initialValue);
 
@@ -54,7 +56,7 @@ const EditableValue = ({
           >
             remove
           </span>
-          <span className="text-[30px]">{internalValue}</span>
+          <span className="text-[30px]">{formatValue(internalValue)}</span>
           <span
             className="flex material-symbols-outlined cursor-pointer bg-stone-500 p-2 rounded-lg select-none"
             onClick={increment}
@@ -107,6 +109,7 @@ export const GaggiaConfigView = () => {
             max={110}
             initialValue={gaggiaConfig.brewSetpoint}
             setValue={setBrewSetpoint}
+            formatValue={(value) => `${value} °C`}
           />
         </DataCard>
         <DataCard>
@@ -123,6 +126,7 @@ export const GaggiaConfigView = () => {
             max={160}
             initialValue={gaggiaConfig.steamSetpoint}
             setValue={setSteamSetpoint}
+            formatValue={(value) => `${value} °C`}
           />
         </DataCard>
         <DataCard>
@@ -139,6 +143,7 @@ export const GaggiaConfigView = () => {
             max={45}
             initialValue={gaggiaConfig.shotTimeLimit}
             setValue={setShotTimeLimit}
+            formatValue={(value) => `${value} s`}
           />
         </DataCard>
       </div>

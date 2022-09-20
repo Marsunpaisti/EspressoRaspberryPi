@@ -21,6 +21,7 @@ const socket = io(host, {
 });
 
 export interface ITelemetryData {
+  localReceivedTimestamp: Date;
   timestamp: Date;
   temperature: number;
   setpoint: number;
@@ -56,6 +57,7 @@ export const GaggiaDataContext = React.createContext<IGaggiaDataContext>(
 
 const convertTelemetryMsgToData = (msg: ITelemetryMessage): ITelemetryData => {
   return {
+    localReceivedTimestamp: new Date(),
     timestamp: new Date(msg.ts),
     temperature: msg.temp,
     setpoint: msg.set,
