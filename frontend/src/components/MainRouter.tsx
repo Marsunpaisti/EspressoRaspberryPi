@@ -14,9 +14,9 @@ import coffeeIcon from '../assets/coffee.png';
 
 export const SpinnerView = ({ text }: { text: string }) => {
   return (
-    <div className="absolute m-auto left-0 right-0 top-0 bottom-0 w-full flex-1 flex-col flex justify-center items-center pointer-events-none">
+    <div className="absolute m-auto left-0 right-0 top-0 bottom-0 flex-1 flex-col flex justify-center items-center pointer-events-none">
       <div className="max-w-[50%] max-h-[50%] aspect-square">
-        <div className="relative w-full h-full max-w-[250px] max-h-[250px] aspect-square">
+        <div className="relative w-full h-full max-w-[250px] max-h-[250px] ">
           <Spinner />
           <p className="absolute m-auto left-4 right-4 top-4 bottom-4 text-center flex items-center justify-center text-blue-100 text-sm">
             {text}
