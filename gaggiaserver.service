@@ -4,6 +4,7 @@
 
  [Service]
  Type=idle
+ WorkingDirectory=/home/pi/PythonScripts/EspressoRaspberryPi
  ExecStart=/usr/bin/bash /home/pi/PythonScripts/EspressoRaspberryPi/execstart.sh
 
  [Install]
