@@ -48,7 +48,6 @@ def sendAndStoreTelemetry(telemetryData: dict):
         return
 
     telemetryHistory.append(telemetryData)
-    debugPrint(f"Sending {str(telemetryData)}")
     sio.emit("telemetry", telemetryData)
 
 

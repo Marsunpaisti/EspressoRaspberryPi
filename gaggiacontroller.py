@@ -168,8 +168,6 @@ class GaggiaController():
         if (timeSinceLastSample < SAMPLING_INTERVAL):
             return
 
-        debugPrint("Control loop logic")
-
         self.lastSampleTimestamp = time.time()
         self.sampleNumber += 1
         boilerTemperature = self.__readTemperature()
