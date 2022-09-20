@@ -14,3 +14,5 @@ try:
         digitalio.DigitalInOut(pin).switch_to_input(pull=digitalio.Pull.DOWN)
 except Exception as e:
     print(e)
+
+print("All pins set to input+pulldown")
