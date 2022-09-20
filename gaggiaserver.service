@@ -1,0 +1,10 @@
+ [Unit]
+ Description=EspressoPI Gaggia Controller server
+ After=multi-user.target
+
+ [Service]
+ Type=idle
+ ExecStart=/usr/bin/bash /home/pi/PythonScripts/EspressoRaspberryPi/execstart.sh
+
+ [Install]
+ WantedBy=multi-user.target
