@@ -148,38 +148,12 @@ export const DataCard: React.FC<PropsWithChildren> = ({ children }) => {
 
 export const GaggiaDataView = () => {
   const { telemetryData: temperatureReadings } = useContext(GaggiaDataContext);
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
-
-  useEffect(() => {
-    const dateInterval = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 100);
-
-    return () => clearInterval(dateInterval);
-  }, []);
 
   if (temperatureReadings.length < 2) {
     return <SpinnerView text="Waiting for data..." />;
   }
   const latestTelemetryData =
     temperatureReadings[temperatureReadings.length - 1];
-  const secondToLastTelemetrydata =
-    temperatureReadings[temperatureReadings.length - 2];
-
-  // Extrapolate last received brew time if we believe brewing is active
-  let brewingActive = false;
-  if (
-    secondToLastTelemetrydata.shotDuration < latestTelemetryData.shotDuration
-  ) {
-    brewingActive = true;
-  }
-  const secondsSinceLastData = Math.min(
-    (currentTime.getTime() - latestTelemetryData.timestamp.getTime()) / 1000,
-    1,
-  );
-  const displayedShotDuration =
-    latestTelemetryData.shotDuration +
-    (brewingActive ? secondsSinceLastData : 0);
 
   return (
     <div className="w-full flex flex-1 flex-col max-w-[1000px] m-auto">
@@ -233,10 +207,13 @@ export const GaggiaDataView = () => {
             <span className="material-symbols-outlined text-[30px]">
               coffee
             </span>
-            {`Shot timer ${displayedShotDuration.toLocaleString(undefined, {
-              minimumFractionDigits: 1,
-              maximumFractionDigits: 1,
-            })} s`}
+            {`Shot timer ${latestTelemetryData.shotDuration.toLocaleString(
+              undefined,
+              {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              },
+            )} s`}
           </p>
         </DataCard>
       </div>
