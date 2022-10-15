@@ -24,6 +24,7 @@ OUTPUT_UPPER_LIMIT = 1.0
 OUTPUT_LOWER_LIMIT = 0.0
 DEFAULT_STEAM_SETPOINT = 150.0
 DEFAULT_BREW_SETPOINT = 94.0
+DEFAULT_BREW_FEEDFORWARD_COMPENSATION = 0.14
 
 STEAM_PIN = board.D23
 BREW_PIN = board.D12
@@ -70,6 +71,7 @@ class GaggiaController():
         self.latestValidTemp = None
         self.steam_setpoint = DEFAULT_STEAM_SETPOINT
         self.brew_setpoint = DEFAULT_BREW_SETPOINT
+        self.brew_feedforward_compensation = DEFAULT_BREW_FEEDFORWARD_COMPENSATION
         self.shot_time_limit = 0
         self.__brewStarted = 0
         self.__brewStopped = 0
@@ -77,8 +79,18 @@ class GaggiaController():
         with shelve.open("config", ) as cfg:
             try:
                 self.steam_setpoint = cfg["steam_setpoint"]
+            except KeyError:
+                pass
+            try:
                 self.brew_setpoint = cfg["brew_setpoint"]
+            except KeyError:
+                pass
+            try:
                 self.shot_time_limit = cfg["shot_time_limit"]
+            except KeyError:
+                pass
+            try:
+                self.brew_feedforward_compensation = cfg["brew_feedforward_compensation"]
             except KeyError:
                 pass
 
@@ -195,7 +207,7 @@ class GaggiaController():
         compensatorOutput = 0.0
         # Sanity check for cases where brew switch might be intentionally activated to reduce temperature
         if (pumpPin.value == True and not steamingSwitch and boilerTemperature < (setpoint + 6.0)):
-            compensatorOutput = 0.14
+            compensatorOutput = DEFAULT_BREW_FEEDFORWARD_COMPENSATION
 
         output = pidOutput + compensatorOutput
         # Clamp output
@@ -298,6 +310,16 @@ class GaggiaController():
             with shelve.open("config", ) as cfg:
                 cfg["shot_time_limit"] = limitSeconds
             debugPrint(f"Shot time limit set to {limitSeconds:.1f}")
+            return True
+        return False
+
+    def setBrewFeedForwardCompensation(self, brewCompensation: float):
+        if (type(brewCompensation) == int or type(brewCompensation) == float and brewCompensation >= 0 and brewCompensation <= 0.3):
+            self.brew_feedforward_compensation = brewCompensation
+            with shelve.open("config", ) as cfg:
+                cfg["brew_feedforward_compensation"] = brewCompensation
+            debugPrint(
+                f"Brew feedforward compensation set to {brewCompensation:.2f}")
             return True
         return False
 
